@@ -1,0 +1,14 @@
+{
+  "classification_v2": {
+    "prompt": "Analyse cet article et classe-le dans UN domaine parmi : veille_fraude, innovation_tech, finance_crypto, actualite_tech.\n\nCritères v2.0 :\n- veille_fraude : Cybersécurité, fraudes, attaques, vulnérabilités\n- innovation_tech : IA, blockchain, recherche, technologies émergentes\n- finance_crypto : Cryptomonnaies, marchés financiers, DeFi, régulation\n- actualite_tech : Startups, business tech, produits, acquisitions\n\nTitre: {title}\nContenu: {content}\nSource: {source}\n\nDomaine (un seul mot):",
+    "version": "2.0"
+  },
+  "summarization_v2": {
+    "prompt": "Crée un résumé structuré de cet article en français pour le domaine {domain} :\n\nTitre: {title}\nContenu: {content}\n\nFormat adapté au domaine :\n• **Point clé 1** : [Idée principale]\n• **Impact** : [Conséquences/Applications]\n• **Action** : [Recommandation]\n\nRésumé structuré :",
+    "version": "2.0"
+  },
+  "obsidian_links": {
+    "prompt": "Extrait 3-5 concepts clés de cet article pour créer des liens Obsidian [[]].\n\nTitre: {title}\nContenu: {content}\nDomaine: {domain}\n\nConcepts (format: Concept1, Concept2, ...):",
+    "version": "2.0"
+  }
+}

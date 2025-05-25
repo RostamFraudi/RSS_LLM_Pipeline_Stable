@@ -1,0 +1,91 @@
+# ==========================================
+# RSS + LLM Pipeline - .gitignore
+# ==========================================
+
+# 🐳 Docker
+.env
+docker-compose.override.yml
+.docker/
+
+# 📝 Données générées (préserver structure, ignorer contenu)
+obsidian_vault/articles/**/*.md
+!obsidian_vault/articles/.gitkeep
+!obsidian_vault/articles/*/
+obsidian_vault/archives/
+obsidian_vault/.obsidian/
+
+# 🔧 Node-RED données utilisateur
+node_red_data/.flows.json.backup
+node_red_data/.flows_cred.json.backup
+node_red_data/.config.*.backup
+node_red_data/flows_cred.json
+node_red_data/.npm/
+node_red_data/node_modules/
+node_red_data/package-lock.json
+
+# 📊 Logs et temporaires
+*.log
+logs/
+tmp/
+temp/
+
+# 🔐 Données sensibles (si ajoutées plus tard)
+.env.local
+.env.production
+secrets/
+credentials/
+*.key
+*.pem
+
+# 🖥️ OS spécifiques
+# Windows
+Thumbs.db
+desktop.ini
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.directory
+
+# 🐍 Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+venv/
+env/
+
+# 📦 Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 🔧 IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 📈 Analytics et métriques (garder structure)
+analytics/data/
+metrics/raw/
+
+# 🧪 Tests temporaires
+test_output/
+test_data/generated/
+
+# ==========================================
+# Garder la structure des dossiers
+# ==========================================
+
+# Force inclusion dossiers vides avec .gitkeep
+!**/.gitkeep

@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  llm-service:
+    build: 
+      context: ./llm_service
+      dockerfile: Dockerfile
+    container_name: rss_llm_service
+    ports:
+      - "15000:5000"
+    volumes:
+      - ../config:/config:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 180s
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+  nodered:
+    build:
+      context: ./nodered_custom
+      dockerfile: Dockerfile
+    container_name: rss_nodered
+    ports:
+      - "18880:1880"
+    volumes:
+      - ../node_red_data:/data
+      - ../obsidian_vault:/obsidian_vault
+      - ../config:/config:ro
+    environment:
+      - TZ=Europe/Paris
+      - NODE_RED_ENABLE_PROJECTS=true
+    depends_on:
+      - llm-service
+    restart: unless-stopped
+
+networks:
+  default:
+    name: rss_llm_network

@@ -1,0 +1,97 @@
+{
+  "sources": [
+    {
+      "name": "OpenAI Blog",
+      "url": "https://openai.com/blog/rss.xml",
+      "domain": "innovation_tech",
+      "priority": "high",
+      "keywords": ["ai", "research", "model", "breakthrough"]
+    },
+    {
+      "name": "Zataz",
+      "url": "http://feeds.feedburner.com/ZatazNews",
+      "domain": "veille_fraude",
+      "priority": "critical",
+      "keywords": ["security", "breach", "vulnerability", "attack"]
+    },
+    {
+      "name": "CoinDesk",
+      "url": "https://feeds.coindesk.com/coindesk/posts",
+      "domain": "finance_crypto",
+      "priority": "high",
+      "keywords": ["bitcoin", "crypto", "blockchain", "defi"]
+    },
+    {
+      "name": "TechCrunch",
+      "url": "https://techcrunch.com/feed/",
+      "domain": "actualite_tech",
+      "priority": "medium",
+      "keywords": ["startup", "funding", "tech", "innovation"]
+    },
+    {
+      "name": "Krebs on Security",
+      "url": "https://krebsonsecurity.com/feed/",
+      "domain": "veille_fraude",
+      "priority": "critical",
+      "keywords": ["cybersecurity", "fraud", "cybercrime"]
+    },
+    {
+      "name": "MIT Technology Review",
+      "url": "https://www.technologyreview.com/feed/",
+      "domain": "innovation_tech",
+      "priority": "high",
+      "keywords": ["research", "science", "technology"]
+    },
+    {
+      "name": "CoinTelegraph",
+      "url": "https://cointelegraph.com/rss",
+      "domain": "finance_crypto",
+      "priority": "medium",
+      "keywords": ["cryptocurrency", "market", "trading"]
+    },
+    {
+      "name": "VentureBeat",
+      "url": "https://venturebeat.com/feed/",
+      "domain": "actualite_tech",
+      "priority": "medium",
+      "keywords": ["enterprise", "ai", "business"]
+    }
+  ],
+  "domains": {
+    "veille_fraude": {
+      "label": "Veille Fraude & Cybersécurité",
+      "emoji": "🚨",
+      "default_alert": "watch",
+      "critical_keywords": ["breach", "attack", "hack", "vulnerability", "malware"],
+      "output_folder": "veille_fraude"
+    },
+    "innovation_tech": {
+      "label": "Innovation Technologique", 
+      "emoji": "🚀",
+      "default_alert": "info",
+      "trending_keywords": ["breakthrough", "revolutionary", "first", "new"],
+      "output_folder": "innovation_tech"
+    },
+    "finance_crypto": {
+      "label": "Finance & Crypto",
+      "emoji": "💰", 
+      "default_alert": "info",
+      "market_keywords": ["surge", "crash", "record", "regulation"],
+      "output_folder": "finance_crypto"
+    },
+    "actualite_tech": {
+      "label": "Actualité Technologique",
+      "emoji": "📱",
+      "default_alert": "info", 
+      "business_keywords": ["funding", "ipo", "acquisition", "partnership"],
+      "output_folder": "actualite_tech"
+    }
+  },
+  "processing": {
+    "interval_minutes": 30,
+    "max_articles_per_run": 50,
+    "enable_classification_v2": true,
+    "enable_obsidian_links": true,
+    "enable_moc_generation": true
+  }
+}

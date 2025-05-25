@@ -1,0 +1,69 @@
+{
+  "_comment": "FICHIER D'EXEMPLE - Copiez vers config/sources.json et personnalisez",
+  
+  "sources": [
+    {
+      "name": "Votre Source RSS",
+      "url": "https://example.com/rss.xml",
+      "domain": "actualite_tech",
+      "priority": "medium",
+      "keywords": ["mot-cle1", "mot-cle2"],
+      "_comment": "Remplacez par vos sources RSS préférées"
+    },
+    {
+      "name": "Source Cybersécurité",
+      "url": "https://security-blog.example.com/rss",
+      "domain": "veille_fraude", 
+      "priority": "high",
+      "keywords": ["security", "vulnerability", "breach"]
+    }
+  ],
+  
+  "domains": {
+    "veille_fraude": {
+      "label": "Veille Fraude & Cybersécurité",
+      "emoji": "🚨",
+      "default_alert": "watch",
+      "critical_keywords": ["breach", "attack", "hack", "vulnerability", "malware"],
+      "output_folder": "veille_fraude"
+    },
+    "innovation_tech": {
+      "label": "Innovation Technologique",
+      "emoji": "🚀", 
+      "default_alert": "info",
+      "trending_keywords": ["breakthrough", "revolutionary", "first", "new"],
+      "output_folder": "innovation_tech"
+    },
+    "finance_crypto": {
+      "label": "Finance & Crypto",
+      "emoji": "💰",
+      "default_alert": "info",
+      "market_keywords": ["surge", "crash", "record", "regulation"],
+      "output_folder": "finance_crypto"
+    },
+    "actualite_tech": {
+      "label": "Actualité Technologique",
+      "emoji": "📱",
+      "default_alert": "info",
+      "business_keywords": ["funding", "ipo", "acquisition", "partnership"],
+      "output_folder": "actualite_tech"
+    }
+  },
+  
+  "processing": {
+    "interval_minutes": 30,
+    "max_articles_per_run": 50,
+    "enable_classification_v2": true,
+    "enable_obsidian_links": true,
+    "enable_moc_generation": true,
+    "_comment": "Ajustez selon vos besoins"
+  },
+  
+  "_instructions": {
+    "étape_1": "Copiez ce fichier vers config/sources.json",
+    "étape_2": "Remplacez les URLs par vos sources RSS",
+    "étape_3": "Personnalisez les mots-clés et domaines",
+    "étape_4": "Lancez start_containers.bat",
+    "support": "Consultez documentation/TAGGING_SYSTEM.md pour aide"
+  }
+}

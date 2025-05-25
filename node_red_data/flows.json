@@ -1,0 +1,725 @@
+[
+    {
+        "id": "a286e71930bddf50",
+        "type": "tab",
+        "label": "RSS Pipeline Stable",
+        "disabled": false,
+        "info": "Pipeline RSS + LLM avec nœuds natifs Node-RED"
+    },
+    {
+        "id": "7e081f306d97e6eb",
+        "type": "group",
+        "z": "a286e71930bddf50",
+        "name": "SOURCES",
+        "style": {
+            "stroke": "#3f93cf",
+            "fill": "#bfdbef",
+            "label": true
+        },
+        "nodes": [
+            "ced5a1942934a354",
+            "b0628ca5f2bae48a",
+            "d84a5bc5e8999686",
+            "c9d1a9a53fa4d259",
+            "5e0f8e9f4deb0d64",
+            "81a2803f3e5a185f"
+        ],
+        "x": 514,
+        "y": 99,
+        "w": 272,
+        "h": 382
+    },
+    {
+        "id": "84c6e14812f48c18",
+        "type": "group",
+        "z": "a286e71930bddf50",
+        "name": "Pré-traitement",
+        "style": {
+            "stroke": "#ffdf7f",
+            "fill": "#ffefbf",
+            "label": true
+        },
+        "nodes": [
+            "1326f6c0ff564efe",
+            "67e53dd386dc1fa0",
+            "b8524d09134466d9",
+            "4bde8394fcc94f98",
+            "fe2411334b8e790e",
+            "ff1249b485e6f9d6",
+            "366b4fa1a98cc202"
+        ],
+        "x": 834,
+        "y": 99,
+        "w": 292,
+        "h": 442
+    },
+    {
+        "id": "6f583ff8a5c124d2",
+        "type": "group",
+        "z": "a286e71930bddf50",
+        "name": "LLMs",
+        "style": {
+            "stroke": "#ff3f3f",
+            "fill": "#ffbfbf",
+            "label": true
+        },
+        "nodes": [
+            "e8c2cbdd77973481",
+            "31d5fa8a7e887603",
+            "adda75fb4c9b6316"
+        ],
+        "x": 1174,
+        "y": 99,
+        "w": 252,
+        "h": 202
+    },
+    {
+        "id": "24a5d19a2bf69b70",
+        "type": "group",
+        "z": "a286e71930bddf50",
+        "name": "CONFIGRUATION",
+        "style": {
+            "fill": "#d1d1d1",
+            "label": true
+        },
+        "nodes": [
+            "4d70a06815ee11b5",
+            "3113abf5266df5a6",
+            "a0962f8cd2076370"
+        ],
+        "x": 54,
+        "y": 359,
+        "w": 412,
+        "h": 162
+    },
+    {
+        "id": "6c76fb3fd0b8defb",
+        "type": "group",
+        "z": "a286e71930bddf50",
+        "name": "OUTPUT",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "f1dcc003bee4cd3a",
+            "ca4a2ad5526289b6"
+        ],
+        "x": 1494,
+        "y": 399,
+        "w": 212,
+        "h": 142
+    },
+    {
+        "id": "87fb0cb215ca48be",
+        "type": "group",
+        "z": "a286e71930bddf50",
+        "name": "Post-traitement",
+        "style": {
+            "stroke": "#ffff3f",
+            "fill": "#ffffbf",
+            "label": true
+        },
+        "nodes": [
+            "22ada62db320bf9b",
+            "7769f131d6b901a6",
+            "e4a5576ef4ec20da"
+        ],
+        "x": 1174,
+        "y": 339,
+        "w": 272,
+        "h": 202
+    },
+    {
+        "id": "4d70a06815ee11b5",
+        "type": "inject",
+        "z": "a286e71930bddf50",
+        "g": "24a5d19a2bf69b70",
+        "name": "🔄 Démarrer Pipeline",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 400,
+        "wires": [
+            [
+                "a0962f8cd2076370"
+            ]
+        ]
+    },
+    {
+        "id": "3113abf5266df5a6",
+        "type": "inject",
+        "z": "a286e71930bddf50",
+        "g": "24a5d19a2bf69b70",
+        "name": "⏰ Auto (30min)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "1800",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 210,
+        "y": 480,
+        "wires": [
+            [
+                "a0962f8cd2076370"
+            ]
+        ]
+    },
+    {
+        "id": "ced5a1942934a354",
+        "type": "file in",
+        "z": "a286e71930bddf50",
+        "g": "7e081f306d97e6eb",
+        "name": "📁 Charger sources.json",
+        "filename": "/config/sources.json",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 650,
+        "y": 440,
+        "wires": [
+            [
+                "b0628ca5f2bae48a"
+            ]
+        ]
+    },
+    {
+        "id": "b0628ca5f2bae48a",
+        "type": "json",
+        "z": "a286e71930bddf50",
+        "g": "7e081f306d97e6eb",
+        "name": "🔧 Parser JSON",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 650,
+        "y": 380,
+        "wires": [
+            [
+                "d84a5bc5e8999686"
+            ]
+        ]
+    },
+    {
+        "id": "d84a5bc5e8999686",
+        "type": "change",
+        "z": "a286e71930bddf50",
+        "g": "7e081f306d97e6eb",
+        "name": "📝 Extraire sources",
+        "rules": [
+            {
+                "t": "move",
+                "p": "payload.sources",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "categories",
+                "pt": "msg",
+                "to": "payload.categories",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 640,
+        "y": 320,
+        "wires": [
+            [
+                "c9d1a9a53fa4d259"
+            ]
+        ]
+    },
+    {
+        "id": "c9d1a9a53fa4d259",
+        "type": "split",
+        "z": "a286e71930bddf50",
+        "g": "7e081f306d97e6eb",
+        "name": "📋 Split sources",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "topic",
+        "x": 640,
+        "y": 260,
+        "wires": [
+            [
+                "5e0f8e9f4deb0d64"
+            ]
+        ]
+    },
+    {
+        "id": "5e0f8e9f4deb0d64",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "7e081f306d97e6eb",
+        "name": "📝 Préparer URL",
+        "func": "msg.url = msg.payload.url;\nmsg.sourceInfo = msg.payload;\nnode.warn(`🔄 Traitement: ${msg.payload.name}`);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 200,
+        "wires": [
+            [
+                "81a2803f3e5a185f"
+            ]
+        ]
+    },
+    {
+        "id": "81a2803f3e5a185f",
+        "type": "http request",
+        "z": "a286e71930bddf50",
+        "g": "7e081f306d97e6eb",
+        "name": "🌐 Récupérer RSS",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "User-Agent",
+                "keyValue": "",
+                "valueType": "other",
+                "valueValue": "RSS-Pipeline/2.0"
+            }
+        ],
+        "x": 650,
+        "y": 140,
+        "wires": [
+            [
+                "4bde8394fcc94f98"
+            ]
+        ]
+    },
+    {
+        "id": "1326f6c0ff564efe",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "📊 Extraire articles",
+        "func": "var rss = msg.payload;\nvar items = [];\n\nnode.warn(\"=== EXTRACTION SANS LIMITES ===\");\nnode.warn(`Source: ${msg.sourceInfo.name}`);\nnode.warn(\"Structure RSS reçue: \" + JSON.stringify(Object.keys(rss), null, 2));\n\n// Essayer différents formats RSS avec logging\nif (rss.rss && rss.rss.channel) {\n    node.warn(\"Format RSS 2.0 détecté\");\n    if (rss.rss.channel.item) {\n        items = rss.rss.channel.item;\n        node.warn(\"Items trouvés dans rss.rss.channel.item\");\n    }\n} else if (rss.feed) {\n    node.warn(\"Format Atom détecté\");\n    if (rss.feed.entry) {\n        items = rss.feed.entry;\n        node.warn(\"Items trouvés dans rss.feed.entry\");\n    }\n} else if (rss.channel) {\n    node.warn(\"Format RSS direct détecté\");\n    if (rss.channel.item) {\n        items = rss.channel.item;\n        node.warn(\"Items trouvés dans rss.channel.item\");\n    }\n} else {\n    node.warn(\"Structure RSS: \" + JSON.stringify(rss, null, 2).substring(0, 500));\n    return null;\n}\n\n// Convertir en array si un seul item\nif (!Array.isArray(items)) {\n    items = [items];\n}\n\n// ✅ LIMITATION STRICTE PAR SOURCE\nvar sourceConfig = msg.sourceConfig || {};\nvar sourceName = msg.sourceInfo.name;\nvar maxForThisSource = sourceConfig[sourceName] ? sourceConfig[sourceName].maxArticles : 5;\n\n// Limitation absolue\nif (items.length > maxForThisSource) {\n    items = items.slice(0, maxForThisSource);\n    node.warn(`✂️ LIMITATION: ${maxForThisSource} articles de ${sourceName} (${items.length} dispos)`);\n} else {\n    node.warn(`📰 TOUS LES ${items.length} articles de ${sourceName}`);\n}\n\nif (items.length === 0) {\n    node.warn(\"Aucun article trouvé\");\n    return null;\n}\n\n// Statistiques détaillées\nmsg.payload = items;\nmsg.sourceStats = {\n    source: msg.sourceInfo.name,\n    totalArticles: items.length,\n    processingMode: items.length > 20 ? 'limité' : 'complet'\n};\n\nnode.warn(`✅ ${msg.sourceInfo.name}: ${items.length} articles à traiter`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 200,
+        "wires": [
+            [
+                "67e53dd386dc1fa0"
+            ]
+        ]
+    },
+    {
+        "id": "67e53dd386dc1fa0",
+        "type": "split",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "📋 Split articles",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "property": "payload",
+        "x": 960,
+        "y": 260,
+        "wires": [
+            [
+                "366b4fa1a98cc202"
+            ]
+        ]
+    },
+    {
+        "id": "b8524d09134466d9",
+        "type": "change",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "📝 Construire article",
+        "rules": [
+            {
+                "t": "set",
+                "p": "article.title",
+                "pt": "msg",
+                "to": "payload.title",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "article.link",
+                "pt": "msg",
+                "to": "payload.link",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "article.description",
+                "pt": "msg",
+                "to": "payload.description",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "article.source",
+                "pt": "msg",
+                "to": "sourceInfo.name",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "article.category",
+                "pt": "msg",
+                "to": "sourceInfo.category",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "article.pubDate",
+                "pt": "msg",
+                "to": "payload.pubDate",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "article.keywords",
+                "pt": "msg",
+                "to": "sourceInfo.keywords",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 380,
+        "wires": [
+            [
+                "ff1249b485e6f9d6"
+            ]
+        ]
+    },
+    {
+        "id": "4bde8394fcc94f98",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "Parser RSS",
+        "func": "// Code pour remplacer dans le nœud \"Parser RSS\" (4bde8394fcc94f98)\nvar xmlString = msg.payload;\n\nif (typeof xmlString !== 'string') {\n    node.error(\"RSS n'est pas une chaîne\");\n    return null;\n}\n\nnode.warn(`📄 RSS reçu: ${xmlString.length} caractères de ${msg.sourceInfo.name}`);\n\ntry {\n    var items = [];\n    \n    // Extraire tous les <item>...</item>\n    var itemMatches = xmlString.match(/<item[^>]*>[\\s\\S]*?<\\/item>/gi) || [];\n    \n    node.warn(`🔍 ${itemMatches.length} items trouvés dans ${msg.sourceInfo.name}`);\n    \n    // === FONCTION PARSING DATES ROBUSTE ===\n    function parsePublicationDate(itemXml) {\n        // Ordre de priorité des champs de date (élargi)\n        const dateFields = ['pubDate', 'published', 'dc:date', 'date', 'updated', 'lastBuildDate', 'pubdate'];\n        \n        node.warn(\"=== DEBUG DATE ===\");\n        node.warn(\"XML item complet: \" + itemXml);\n        \n        for (var i = 0; i < dateFields.length; i++) {\n            var field = dateFields[i];\n            var regex = new RegExp('<' + field + '[^>]*>([\\\\s\\\\S]*?)<\\\\/' + field + '>', 'i');\n            var match = itemXml.match(regex);\n            \n            node.warn('Champ ' + field + ': ' + (match ? 'TROUVÉ' : 'non trouvé'));\n            \n            if (match && match[1]) {\n                let dateStr = match[1].replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g, '$1').trim();\n                node.warn(`Date brute trouvée (${field}): \"${dateStr}\"`);\n                \n                try {\n                    // Nettoyer formats RSS courants\n                    dateStr = dateStr.replace(/\\s*\\([^)]*\\)$/, ''); // Supprimer timezone en fin\n                    \n                    const parsedDate = new Date(dateStr);\n                    node.warn(`Date parsée: ${parsedDate.toString()}`);\n                    \n                    if (!isNaN(parsedDate.getTime())) {\n                        // Vérifier que la date n'est pas dans le futur lointain\n                        var now = new Date();\n                        var oneMonthFuture = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));\n                        \n                        // Configuration flexible pour les limites de date\n                        var acceptHistorical = msg.acceptHistorical || false;\n                        var minDate = acceptHistorical ? \n                            new Date('2010-01-01') : \n                            new Date(now.getFullYear() - 1, 0, 1); // 1 an par défaut\n                        \n                        if (parsedDate >= minDate && parsedDate <= oneMonthFuture) {\n                            node.warn('✅ Date valide utilisée: ' + parsedDate.toISOString());\n                            return parsedDate.toISOString();\n                        } else {\n                            node.warn('⚠️ Date hors plage (' + minDate.getFullYear() + '-' + now.getFullYear() + '): ' + parsedDate.toISOString());\n                        }\n                    } else {\n                        node.warn(`❌ Date invalide après parsing`);\n                    }\n                } catch (e) {\n                    node.warn(`❌ Erreur parsing: ${e.message}`);\n                }\n            }\n        }\n        \n        // Fallback: date actuelle si aucune date valide trouvée\n        const fallbackDate = new Date().toISOString();\n        node.warn(`⚠️ FALLBACK utilisé: ${fallbackDate}`);\n        return fallbackDate;\n    }\n    \n    // Parser chaque item SANS AUCUNE LIMITATION\n    itemMatches.forEach((itemXml, index) => {\n        \n        // Extraction avec gestion CDATA complète\n        function extractTag(xml, tagName) {\n            var regex = new RegExp(`<${tagName}[^>]*>([\\\\s\\\\S]*?)<\\\\/${tagName}>`, 'i');\n            var match = xml.match(regex);\n            if (match && match[1]) {\n                var content = match[1];\n                // Nettoyer CDATA\n                content = content.replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g, '$1');\n                return content.trim();\n            }\n            return '';\n        }\n        \n        // Extraction complète de tous les champs\n        var title = extractTag(itemXml, 'title') || 'Titre manquant';\n        var link = extractTag(itemXml, 'link') || '#';\n        var description = extractTag(itemXml, 'description') || '';\n        var content = extractTag(itemXml, 'content:encoded') || extractTag(itemXml, 'content') || '';\n        var summary = extractTag(itemXml, 'summary') || '';\n        var guid = extractTag(itemXml, 'guid') || '';\n        var author = extractTag(itemXml, 'author') || extractTag(itemXml, 'dc:creator') || '';\n        var category = extractTag(itemXml, 'category') || '';\n        \n        // === PARSING DATE INTELLIGENT ===\n        var pubDate = parsePublicationDate(itemXml);\n        \n        // Nettoyage HTML minimal (garder le contenu complet)\n        title = title.replace(/<[^>]*>/g, '').trim();\n        \n        // Priorité du contenu : content:encoded > description > summary\n        var fullContent = '';\n        if (content && content.length > 0) {\n            fullContent = content;\n            node.warn(`📝 Utilisation content:encoded (${content.length} chars)`);\n        } else if (description && description.length > 0) {\n            fullContent = description;\n            node.warn(`📝 Utilisation description (${description.length} chars)`);\n        } else if (summary && summary.length > 0) {\n            fullContent = summary;\n            node.warn(`📝 Utilisation summary (${summary.length} chars)`);\n        }\n        \n        // Nettoyage HTML mais CONSERVATION DU TEXTE COMPLET\n        fullContent = fullContent.replace(/<script[^>]*>.*?<\\/script>/gi, '')\n                                 .replace(/<style[^>]*>.*?<\\/style>/gi, '')\n                                 .replace(/<[^>]*>/g, ' ')\n                                 .replace(/&nbsp;/g, ' ')\n                                 .replace(/&amp;/g, '&')\n                                 .replace(/&lt;/g, '<')\n                                 .replace(/&gt;/g, '>')\n                                 .replace(/&quot;/g, '\"')\n                                 .replace(/&#39;/g, \"'\")\n                                 .replace(/\\s+/g, ' ')\n                                 .trim();\n        \n        var article = {\n            title: title,\n            link: link,\n            description: fullContent,\n            fullContent: fullContent,\n            originalDescription: description,\n            originalContent: content,\n            summary: summary,\n            pubDate: pubDate,                           // ✅ DATE DE PUBLICATION RÉELLE\n            pubDateParsed: new Date(pubDate),          // ✅ OBJET DATE POUR TRI\n            guid: guid,\n            author: author,\n            originalCategory: category,\n            contentLength: fullContent.length,\n            hasRichContent: content.length > description.length\n        };\n        \n        items.push(article);\n        \n        node.warn(`📋 ${index + 1}. \"${title.substring(0, 60)}...\" [${pubDate.split('T')[0]}]`);\n    });\n    \n    if (items.length === 0) {\n        node.warn(\"❌ Aucun article extrait\");\n        return null;\n    }\n    \n    // === TRI PAR DATE DE PUBLICATION (PLUS RÉCENT EN PREMIER) ===\n    items.sort(function(a, b) {\n        var dateA = new Date(a.pubDate);\n        var dateB = new Date(b.pubDate);\n        \n        // Vérifier que les dates sont valides\n        if (isNaN(dateA.getTime())) dateA = new Date();\n        if (isNaN(dateB.getTime())) dateB = new Date();\n        \n        return dateB.getTime() - dateA.getTime();\n    });\n    node.warn(`🔄 Articles triés par date de publication`);\n    \n    // Simuler la structure attendue par le reste du flux\n    msg.payload = {\n        rss: {\n            channel: {\n                item: items\n            }\n        }\n    };\n    \n    // Statistiques avec dates\n    var dateRange = items.length > 1 ? \n        items[items.length-1].pubDate.split('T')[0] + ' à ' + items[0].pubDate.split('T')[0] :\n        items[0].pubDate.split('T')[0];\n    \n    msg.contentStats = {\n        source: msg.sourceInfo.name,\n        totalArticles: items.length,\n        dateRange: dateRange,\n        oldestArticle: items[items.length-1].pubDate,\n        newestArticle: items[0].pubDate,\n        totalCharacters: items.reduce((sum, item) => sum + item.contentLength, 0)\n    };\n    \n    node.warn(`✅ ${items.length} articles extraits et triés par date`);\n    node.warn(`📅 Période: ${dateRange}`);\n    \n    return msg;\n    \n} catch (error) {\n    node.error(\"Erreur parsing RSS: \" + error.message);\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 140,
+        "wires": [
+            [
+                "1326f6c0ff564efe"
+            ]
+        ]
+    },
+    {
+        "id": "fe2411334b8e790e",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "📝 Formatter Article",
+        "func": "// === CHARGEMENT DE LA CONFIGURATION DES SOURCES ===\nlet sourcesConfig = [];\ntry {\n    const fs = global.get('fs') || require('fs');\n    const sourcesData = fs.readFileSync('/config/sources.json', 'utf8');\n    const config = JSON.parse(sourcesData);\n    sourcesConfig = config.sources || [];\n    node.warn(`📋 ${sourcesConfig.length} sources configurées chargées`);\n} catch (error) {\n    node.warn(\"⚠️ Impossible de charger sources.json, utilisation des valeurs par défaut\");\n    sourcesConfig = [];\n}\n\n// === TRAITEMENT DES DONNÉES ARTICLE ===\nconst article = msg.article;\n\n// Vérification que l'article existe\nif (!article || typeof article !== 'object') {\n    node.error(\"msg.article manquant ou invalide\");\n    return null;\n}\n\n// === DÉTECTION AUTOMATIQUE DE LA SOURCE (sans URL) ===\nconst link = (msg.topic && typeof msg.topic === 'string') \n    ? msg.topic\n    : (article.link && typeof article.link === 'string') \n        ? article.link \n        : '#';\n\n// Fonction utilitaire pour extraire le hostname\nfunction extractHostname(url) {\n    try {\n        // Supprimer le protocole\n        let hostname = url.replace(/^https?:\\/\\//, '');\n        // Supprimer le chemin\n        hostname = hostname.split('/')[0];\n        // Supprimer le port si présent\n        hostname = hostname.split(':')[0];\n        return hostname.toLowerCase();\n    } catch (e) {\n        return '';\n    }\n}\n\n// Trouver la source correspondante\nlet detectedSource = null;\nconst articleHostname = extractHostname(link);\n\nfor (const source of sourcesConfig) {\n    const sourceHostname = extractHostname(source.url);\n    \n    if (articleHostname === sourceHostname || \n        articleHostname.includes(sourceHostname) || \n        link.toLowerCase().includes(sourceHostname)) {\n        detectedSource = source;\n        break;\n    }\n}\n\n// Source par défaut si non détectée\nif (!detectedSource) {\n    // Essayer de deviner la source depuis l'URL\n    if (link.includes('openai.com')) {\n        detectedSource = { name: \"OpenAI Blog\", category: \"ia\", keywords: [] };\n    } else if (link.includes('huggingface.co')) {\n        detectedSource = { name: \"Hugging Face\", category: \"ia\", keywords: [] };\n    } else if (link.includes('github.')) {\n        detectedSource = { name: \"GitHub\", category: \"dev\", keywords: [] };\n    } else if (link.includes('aws.amazon.com')) {\n        detectedSource = { name: \"AWS\", category: \"cloud\", keywords: [] };\n    } else {\n        detectedSource = {\n            name: \"Source Inconnue\",\n            category: \"autre\",\n            keywords: []\n        };\n    }\n}\n\nnode.warn(`🔍 Source détectée: ${detectedSource.name} (${detectedSource.category})`);\n\n// === EXTRACTION SÉCURISÉE DES DONNÉES ===\nconst title = (article.title && typeof article.title === 'string') \n    ? article.title \n    : 'Titre manquant';\n\nconst description = (typeof msg.payload === 'string' && msg.payload.length > 0) \n    ? msg.payload\n    : (article.description && typeof article.description === 'string') \n        ? article.description\n        : (article.summary && typeof article.summary === 'string') \n            ? article.summary \n            : 'Description manquante';\n\nconst pubDate = article.pubDate || article.pubDate || article.date || new Date().toISOString();\n\n// === NETTOYAGE ET FORMATAGE ===\nconst cleanDescription = description.replace(/<[^>]*>/g, '').trim().substring(0, 800);\n\n// Vérification finale\nif (title === 'Titre manquant' || cleanDescription === 'Description manquante' || cleanDescription.length === 0) {\n    node.warn(\"⚠️ Article avec données incomplètes, on passe au suivant\");\n    return null;\n}\n\n// === EXTRACTION INTELLIGENTE DU TITRE (sans URL) ===\nlet finalTitle = title;\n\nif (title === 'Titre manquant' && link !== '#') {\n    // Extraction simple par manipulation de chaîne\n    try {\n        let pathname = link;\n        \n        // Supprimer le protocole et le hostname\n        if (pathname.includes('://')) {\n            const parts = pathname.split('://')[1].split('/');\n            pathname = '/' + parts.slice(1).join('/');\n        }\n        \n        // Différentes stratégies selon la source\n        if (pathname.includes('/index/')) {\n            // Format OpenAI: /index/nom-article\n            const urlParts = pathname.split('/index/')[1];\n            if (urlParts) {\n                finalTitle = urlParts.split('?')[0].replace(/-/g, ' ');\n                finalTitle = finalTitle.charAt(0).toUpperCase() + finalTitle.slice(1);\n            }\n        } else if (pathname.includes('/blog/')) {\n            // Format blog standard: /blog/nom-article\n            const urlParts = pathname.split('/blog/')[1];\n            if (urlParts) {\n                finalTitle = urlParts.split('?')[0].replace(/-/g, ' ');\n                finalTitle = finalTitle.charAt(0).toUpperCase() + finalTitle.slice(1);\n            }\n        } else {\n            // Extraction générale du dernier segment\n            const segments = pathname.split('/').filter(s => s.length > 0);\n            if (segments.length > 0) {\n                const lastSegment = segments[segments.length - 1];\n                finalTitle = lastSegment.split('?')[0].replace(/-/g, ' ');\n                finalTitle = finalTitle.charAt(0).toUpperCase() + finalTitle.slice(1);\n            }\n        }\n        \n        node.warn(`🔧 Titre extrait de l'URL: ${finalTitle}`);\n    } catch (e) {\n        node.warn(\"⚠️ Impossible d'extraire le titre de l'URL: \" + e.message);\n    }\n}\n\n// === PRÉPARATION DES DONNÉES FINALES ===\nmsg.article = {\n    title: finalTitle,\n    description: cleanDescription,\n    link: link,\n    pubDate: pubDate,\n    source: detectedSource.name,\n    sourceCategory: detectedSource.category,\n    category: detectedSource.category\n};\n\nmsg.payload = {\n    title: finalTitle,\n    content: cleanDescription,\n    source_info: {\n        name: detectedSource.name,\n        category: detectedSource.category,\n        keywords: detectedSource.keywords || [],\n        url: link\n    }\n};\n\nnode.warn(`✅ Article traité: ${finalTitle.substring(0, 50)}...`);\nnode.warn(`📂 Source: ${detectedSource.name}`);\nnode.warn(`🏷️ Catégorie par défaut: ${detectedSource.category}`);\nnode.warn(`📄 Description: ${cleanDescription.substring(0, 100)}...`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 980,
+        "y": 500,
+        "wires": [
+            [
+                "e8c2cbdd77973481"
+            ]
+        ]
+    },
+    {
+        "id": "e8c2cbdd77973481",
+        "type": "http request",
+        "z": "a286e71930bddf50",
+        "g": "6f583ff8a5c124d2",
+        "name": "🧠 Métadonnées v2",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://llm-service:5000/generate_metadata",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "Content-Type",
+                "keyValue": "",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 1300,
+        "y": 140,
+        "wires": [
+            [
+                "31d5fa8a7e887603"
+            ]
+        ]
+    },
+    {
+        "id": "31d5fa8a7e887603",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "6f583ff8a5c124d2",
+        "name": "🔄 Préparer Résumé",
+        "func": "const article = msg.article;\nconst metadata = msg.payload; // Métadonnées v2\n\n// Stocker les métadonnées\nmsg.classification_v2 = metadata;\n\n// Mise à jour domaine\narticle.domain = metadata.domain;\n\n// Préparation résumé avec domaine\nmsg.payload = {\n    title: article.title,\n    content: article.description,\n    domain: metadata.domain\n};\n\nnode.warn(`🏷️ Domaine v2: ${metadata.domain_label}`);\nnode.warn(`${metadata.alert_level === 'critical' ? '🔴' : '📊'} Alerte: ${metadata.alert_level}`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1300,
+        "y": 200,
+        "wires": [
+            [
+                "adda75fb4c9b6316"
+            ]
+        ]
+    },
+    {
+        "id": "adda75fb4c9b6316",
+        "type": "http request",
+        "z": "a286e71930bddf50",
+        "g": "6f583ff8a5c124d2",
+        "name": "✍️ Résumé",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://llm-service:5000/summarize_v2",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "Content-Type",
+                "keyValue": "",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 1310,
+        "y": 260,
+        "wires": [
+            [
+                "22ada62db320bf9b"
+            ]
+        ]
+    },
+    {
+        "id": "e4a5576ef4ec20da",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "87fb0cb215ca48be",
+        "name": "💾 Créer Markdown",
+        "func": "// Code pour remplacer dans le nœud \"💾 Créer Markdown\" (e4a5576ef4ec20da)\nconst article = msg.article;\nconst metadata = msg.classification_v2;\nconst summaryResult = msg.payload;\n\n// === UTILISATION DATE DE PUBLICATION RÉELLE ===\nconst pubDate = new Date(article.pubDate);\nconst now = new Date();\n\n// Formatage dates avec date de publication\nconst pubDateStr = pubDate.toISOString().split('T')[0];      // YYYY-MM-DD publication\nconst pubTimeStr = pubDate.toISOString().split('T')[1].split('.')[0];\nconst processedStr = now.toISOString().split('T')[0];        // Date traitement\nconst processedTimeStr = now.toISOString().split('T')[1].split('.')[0];\n\n// === STRUCTURE HIÉRARCHIQUE PAR DATE ===\nconst year = pubDate.getFullYear();\nconst month = String(pubDate.getMonth() + 1).padStart(2, '0');\n\n// Nom de fichier avec DATE DE PUBLICATION\nconst safeTitle = article.title.replace(/[^a-zA-Z0-9À-ÿ\\s]/g, '').substring(0, 40).replace(/\\s+/g, '_');\nconst fileName = `${pubDateStr}_${safeTitle}.md`;\n\n// Emojis par domaine\nconst domainEmojis = {\n    'veille_fraude': '🚨',\n    'innovation_tech': '🚀', \n    'finance_crypto': '💰',\n    'actualite_tech': '📱'\n};\n\nconst alertEmojis = {\n    'critical': '🔴',\n    'alert': '🟡', \n    'watch': '⚠️',\n    'info': '📊'\n};\n\nconst domainEmoji = domainEmojis[metadata.domain] || '📰';\nconst alertEmoji = alertEmojis[metadata.alert_level] || '📊';\n\n// === CONTENU MARKDOWN AVEC VRAIES DATES ===\nconst markdown = `---\ntitle: \"${article.title.replace(/\"/g, '\\\\\"')}\"\nsource: \"${article.source}\"\ndomain: \"${metadata.domain}\"\ndomain_label: \"${metadata.domain_label}\"\nclassification_v2: true\npublication_date: ${article.pubDate}                    # ✅ DATE PUBLICATION RÉELLE\nprocessed_date: ${now.toISOString()}                    # Date de traitement\nurl: \"${article.link}\"\ntags: ${JSON.stringify(['rss', metadata.domain, ...metadata.strategic_tags])}\nobsidian_concepts: ${JSON.stringify(metadata.obsidian_concepts)}\nstrategic_tags: ${JSON.stringify(metadata.strategic_tags)}\nalert_level: \"${metadata.alert_level}\"\nconfidence: ${metadata.confidence}\ndate_hierarchy:\n  year: ${year}\n  month: ${month}\n  date_key: \"${pubDateStr}\"\nprocessing_stats:\n  method: \"${metadata.classification_method}\"\n  processing_time: \"${metadata.processing_time}s\"\n  version: \"${metadata.version}\"\n---\n# ${domainEmoji} ${article.title}\n\n> **${metadata.domain_label}** | **${article.source}** | 📅 **${pubDateStr}** | ${alertEmoji} ${metadata.alert_level}\n\n${summaryResult.summary}\n\n## 🔗 Informations\n\n- **Source** : ${article.source}\n- **Domaine** : ${metadata.domain_label} (\\`${metadata.domain}\\`)\n- **📅 Date de publication** : **${pubDateStr}** ${pubTimeStr}\n- **URL originale** : [📖 Lire l'article complet](${article.link})\n- **Niveau d'alerte** : ${alertEmoji} ${metadata.alert_level}\n- **⚙️ Traité le** : ${processedStr} ${processedTimeStr}\n\n## 🗓️ Navigation Temporelle\n\n### Articles du même période\n- [[Articles ${year}/${month}]] • [[Timeline ${year}]]\n- [[Veille ${pubDateStr}]] • [[Derniers Articles]]\n\n## 🧠 Réseau de Connaissances\n\n### Concepts liés\n${metadata.obsidian_concepts.map(concept => `- [[${concept}]]`).join('\\n')}\n\n### Navigation stratégique  \n- [[${metadata.domain_label} - Index]] • [[MOC Veille 2025]]\n- [[Trends ${metadata.domain}]] • [[Analytics Dashboard]]\n\n### Tags de veille\n${metadata.strategic_tags.join(' ')} \n\n## 📝 Contenu\n\n${article.description}\n\n---\n\n## 🔄 Métadonnées Pipeline\n\n<details>\n<summary>📊 Informations de traitement v2.0</summary>\n\n- **Version** : Système Hybride v2.0 + Dates\n- **Classification** : ${metadata.classification_method}\n- **Confiance** : ${metadata.confidence}%\n- **Temps de traitement** : ${metadata.processing_time}s\n- **📅 Publication** : ${pubDateStr} ${pubTimeStr}\n- **⚙️ Traitement** : ${processedStr} ${processedTimeStr}\n- **Délai traitement** : ${Math.round((now.getTime() - pubDate.getTime()) / (1000 * 60 * 60 * 24))} jours\n- **Domaine détecté** : ${metadata.domain}\n- **Liens générés** : ${metadata.obsidian_concepts.length}\n- **Tags stratégiques** : ${metadata.strategic_tags.length}\n- **Fichier** : \\`${fileName}\\`\n\n</details>\n\n## 📈 Actions de Suivi\n\n- [ ] Analyser l'impact stratégique\n- [ ] Vérifier les connexions avec [[Projets en cours]]\n- [ ] Mettre à jour [[Tableau de Bord Veille]]\n- [ ] Partager si pertinence > seuil critique\n\n---\n\n*Analysé automatiquement par Pipeline RSS + LLM v2.0 • Publié: ${pubDateStr} • Traité: ${processedStr}*\n\n<!-- Navigation temporelle -->\n[[◀️ ${pubDateStr}]] | [[📅 Archives ${year}/${month}]] | [[${pubDateStr} ▶️]]`;\n\n// === STRUCTURE DOSSIERS HIÉRARCHIQUE ===\nconst outputFolder = metadata.domain || 'actualite_tech';\n\n// Option 1: Hiérarchie par année/mois\nmsg.filename = `/obsidian_vault/articles/${outputFolder}/${year}/${month}/${fileName}`;\n\n// Option 2: Simple avec préfixe date (moins invasive)\n// msg.filename = `/obsidian_vault/articles/${outputFolder}/${fileName}`;\n\nmsg.payload = markdown;\n\n// Debug avec dates\nnode.warn(`📁 DOSSIER: ${outputFolder}/${year}/${month}/${fileName}`);\nnode.warn(`📅 PUB: ${pubDateStr} | TRAITÉ: ${processedStr}`);\nnode.warn(`${domainEmoji} DOMAINE: ${metadata.domain_label}`);\nnode.warn(`${alertEmoji} ALERTE: ${metadata.alert_level}`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1320,
+        "y": 500,
+        "wires": [
+            [
+                "ca4a2ad5526289b6"
+            ]
+        ]
+    },
+    {
+        "id": "f1dcc003bee4cd3a",
+        "type": "debug",
+        "z": "a286e71930bddf50",
+        "g": "6c76fb3fd0b8defb",
+        "name": "✅ Succès",
+        "active": true,
+        "complete": "filename",
+        "x": 1590,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "ca4a2ad5526289b6",
+        "type": "file",
+        "z": "a286e71930bddf50",
+        "g": "6c76fb3fd0b8defb",
+        "name": "",
+        "filename": "filename",
+        "filenameType": "msg",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "utf8",
+        "x": 1600,
+        "y": 500,
+        "wires": [
+            [
+                "f1dcc003bee4cd3a"
+            ]
+        ]
+    },
+    {
+        "id": "ff1249b485e6f9d6",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "🔄 Préparer Classification",
+        "func": "// Vérification robuste\nif (!msg.article.title || !msg.article.description) {\n    node.error(`❌ Classification impossible - données manquantes`);\n    return null;\n}\n\nmsg.url = \"http://llm-service:5000/classify\";\n\n// TEXTE COMPLET POUR LE LLM - PAS DE LIMITATION\nmsg.payload = {\n    title: msg.article.title,\n    content: msg.article.description, // TEXTE COMPLET !\n    source_info: {\n        name: msg.article.source,\n        category: msg.article.category\n    }\n};\n\nnode.warn(`🔍 Classification: ${msg.article.title.substring(0, 50)}...`);\nnode.warn(`📊 Contenu: ${msg.payload.content.length} caractères (COMPLET)`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 980,
+        "y": 440,
+        "wires": [
+            [
+                "fe2411334b8e790e"
+            ]
+        ]
+    },
+    {
+        "id": "22ada62db320bf9b",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "87fb0cb215ca48be",
+        "name": "🔄 Traiter Résumé",
+        "func": "// Récupérer le résumé du LLM\nconst summaryResult = msg.payload;\n\n// Ajouter le résumé à l'article\nif (summaryResult.summary) {\n    msg.article.summary = summaryResult.summary;\n} else {\n    msg.article.summary = \"Résumé non disponible\";\n}\n\n// Remettre l'article en payload pour la suite\nmsg.payload = msg.article;\n\nnode.warn(`✅ Résumé ajouté: ${msg.article.summary.substring(0, 50)}...`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1290,
+        "y": 380,
+        "wires": [
+            [
+                "7769f131d6b901a6"
+            ]
+        ]
+    },
+    {
+        "id": "7769f131d6b901a6",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "87fb0cb215ca48be",
+        "name": "🧹 Nettoyer données",
+        "func": "// Nettoyer le titre\nif (msg.article.title) {\n    if (typeof msg.article.title === 'object' && msg.article.title._) {\n        msg.article.title = msg.article.title._;\n    }\n    msg.article.title = String(msg.article.title).replace(/<[^>]*>/g, '').trim();\n}\n\n// Nettoyer la description\nif (msg.article.description) {\n    if (typeof msg.article.description === 'object' && msg.article.description._) {\n        msg.article.description = msg.article.description._;\n    }\n    msg.article.description = String(msg.article.description).replace(/<[^>]*>/g, '').trim();\n}\n\n// Nettoyer le lien\nif (msg.article.link) {\n    if (typeof msg.article.link === 'object' && msg.article.link._) {\n        msg.article.link = msg.article.link._;\n    }\n    msg.article.link = String(msg.article.link).trim();\n}\n\n// Date de traitement\nmsg.article.processedDate = new Date().toISOString().split('T')[0];\n\n// Nom de fichier sécurisé\nvar safeTitle = msg.article.title.replace(/[^a-zA-Z0-9À-ÿ\\s]/g, '').substring(0, 40).replace(/\\s+/g, '_');\nmsg.filename = `articles/${msg.article.category}/${msg.article.processedDate}_${safeTitle}.md`;\n\nnode.warn(`📄 Article: ${msg.article.title.substring(0, 50)}...`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1300,
+        "y": 440,
+        "wires": [
+            [
+                "e4a5576ef4ec20da"
+            ]
+        ]
+    },
+    {
+        "id": "a0962f8cd2076370",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "24a5d19a2bf69b70",
+        "name": "Config",
+        "func": "// ===== RESET COMPLET DES VARIABLES GLOBALES =====\nglobal.set('pipeline_config', null);\nglobal.set('session_stats', null);\n\nnode.warn(\"🧹 RESET: Variables globales vidées\");\n\n// ===== NOUVELLE CONFIGURATION FORCÉE =====\nvar config = {\n    max_articles_per_run: 30,\n    enable_deduplication: true,\n    processed_articles: new Set()\n};\n\n// ===== CHOISIR UNE PÉRIODE (décommenter UNE ligne) =====\n\n// 🕐 PÉRIODES COURTES\n// config.hours_lookback = 24;        // Dernières 24h\n// config.hours_lookback = 72;        // Derniers 3 jours  \n// config.hours_lookback = 168;       // Dernière semaine\n\n// 📅 PÉRIODES MOYENNES  \nconfig.days_lookback = 30;         // ✅ ACTIF: Dernier mois\n// config.days_lookback = 90;        // 3 derniers mois\n// config.days_lookback = 365;       // Dernière année\n\n// 🎯 PÉRIODE SPÉCIFIQUE\n// config.specific_period = {\n//     start_date: '2024-01-01',\n//     end_date: '2024-12-31'\n// };\n\n// 🌐 TOUS LES ARTICLES (décommenter pour désactiver filtrage)\n// config.disable_date_filter = true;\n\n// ===== SAUVEGARDE FORCÉE =====\nglobal.set('pipeline_config', config);\n\nvar session_stats = {\n    execution_id: Date.now(),\n    start_time: new Date().toISOString(),\n    max_articles: config.max_articles_per_run,\n    processed_count: 0,\n    skipped_count: 0\n};\nglobal.set('session_stats', session_stats);\n\n// Configuration flux\nmsg.maxArticles = config.max_articles_per_run;\nmsg.acceptHistorical = true;\n\n// ===== DEBUG CONFIGURATION =====\nnode.warn(\"=== CONFIGURATION ACTIVE ===\");\nif (config.disable_date_filter) {\n    node.warn(\"🌐 TOUS LES ARTICLES (aucune limite temporelle)\");\n} else if (config.specific_period) {\n    node.warn(`📅 PÉRIODE SPÉCIFIQUE: ${config.specific_period.start_date} → ${config.specific_period.end_date}`);\n} else if (config.days_lookback) {\n    node.warn(`📅 PÉRIODE: ${config.days_lookback} derniers jours`);\n    var cutoff_date = new Date(Date.now() - (config.days_lookback * 24 * 60 * 60 * 1000));\n    node.warn(`📅 ARTICLES ACCEPTÉS DEPUIS: ${cutoff_date.toLocaleDateString('fr-FR')}`);\n} else if (config.hours_lookback) {\n    node.warn(`⏰ PÉRIODE: ${config.hours_lookback} dernières heures`);\n    var cutoff_date = new Date(Date.now() - (config.hours_lookback * 60 * 60 * 1000));\n    node.warn(`⏰ ARTICLES ACCEPTÉS DEPUIS: ${cutoff_date.toLocaleString('fr-FR')}`);\n}\n\nnode.warn(`🎯 LIMITE: ${config.max_articles_per_run} articles max`);\nnode.warn(`🔄 DÉDUPLICATION: ${config.enable_deduplication ? 'ACTIVÉE' : 'DÉSACTIVÉE'}`);\nnode.warn(\"=========================\");\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 440,
+        "wires": [
+            [
+                "ced5a1942934a354"
+            ]
+        ]
+    },
+    {
+        "id": "366b4fa1a98cc202",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "Filter Article",
+        "func": "// FILTRAGE AVEC DEBUG DÉTAILLÉ\nvar session = global.get('session_stats');\nvar config = global.get('pipeline_config');\n\n// Vérification configuration\nif (!session || !config) {\n    node.error(\"❌ Configuration manquante - Relancez le pipeline depuis le début\");\n    return null;\n}\n\n// Vérification limite absolue\nif (session.processed_count >= session.max_articles) {\n    node.warn(`⏹️ LIMITE ATTEINTE: ${session.processed_count}/${session.max_articles} - ARRÊT`);\n    return null;\n}\n\n// Extraction données article\nvar article = msg.payload;\nif (!article || !article.title) {\n    session.skipped_count++;\n    global.set('session_stats', session);\n    node.warn(\"❌ Article invalide (pas de titre)\");\n    return null;\n}\n\n// Debug article\nvar article_date = new Date(article.pubDate || article.pubDateParsed || new Date());\nnode.warn(`🔍 ANALYSE: \"${article.title.substring(0, 50)}...\" [${article_date.toLocaleDateString('fr-FR')}]`);\n\n// ID unique pour déduplication\nvar title_clean = article.title.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 30);\nvar link_clean = (article.link || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 30);\nvar unique_id = `${title_clean}_${link_clean}`;\n\n// Test déduplication\nif (config.enable_deduplication && config.processed_articles.has(unique_id)) {\n    session.skipped_count++;\n    global.set('session_stats', session);\n    node.warn(`⏭️ DÉJÀ TRAITÉ: ${article.title.substring(0, 40)}...`);\n    return null;\n}\n\n// ===== FILTRAGE TEMPOREL AVEC DEBUG =====\nvar now = new Date();\n\n// Debug config temporelle\nnode.warn(\"📅 CONFIG TEMPORELLE:\");\nif (config.disable_date_filter) {\n    node.warn(\"   🌐 AUCUNE LIMITE (tous articles acceptés)\");\n} else if (config.specific_period) {\n    node.warn(`   📅 PÉRIODE: ${config.specific_period.start_date} → ${config.specific_period.end_date}`);\n} else if (config.days_lookback) {\n    node.warn(`   📅 DERNIERS ${config.days_lookback} JOURS`);\n} else if (config.hours_lookback) {\n    node.warn(`   ⏰ DERNIÈRES ${config.hours_lookback} HEURES`);\n} else {\n    node.warn(\"   ⚠️ AUCUNE CONFIG TEMPORELLE DÉFINIE\");\n}\n\n// Appliquer le filtrage\nif (config.disable_date_filter) {\n    node.warn(\"   ✅ ACCEPTÉ (pas de limite temporelle)\");\n} else if (config.specific_period) {\n    var start_date = new Date(config.specific_period.start_date + 'T00:00:00');\n    var end_date = new Date(config.specific_period.end_date + 'T23:59:59');\n    \n    node.warn(`   📅 PÉRIODE: ${start_date.toLocaleDateString()} → ${end_date.toLocaleDateString()}`);\n    node.warn(`   📅 ARTICLE: ${article_date.toLocaleDateString()}`);\n    \n    if (article_date < start_date || article_date > end_date) {\n        session.skipped_count++;\n        global.set('session_stats', session);\n        node.warn(`   ❌ HORS PÉRIODE: ${article.title.substring(0, 40)}...`);\n        return null;\n    }\n    node.warn(\"   ✅ DANS LA PÉRIODE\");\n} else if (config.days_lookback) {\n    var cutoff = new Date(now.getTime() - (config.days_lookback * 24 * 60 * 60 * 1000));\n    \n    node.warn(`   📅 LIMITE: ${cutoff.toLocaleDateString('fr-FR')}`);\n    node.warn(`   📅 ARTICLE: ${article_date.toLocaleDateString('fr-FR')}`);\n    \n    if (article_date < cutoff) {\n        session.skipped_count++;\n        global.set('session_stats', session);\n        node.warn(`   ❌ TROP ANCIEN (>${config.days_lookback} jours)`);\n        return null;\n    }\n    node.warn(\"   ✅ DANS LA PÉRIODE\");\n} else if (config.hours_lookback) {\n    var cutoff = new Date(now.getTime() - (config.hours_lookback * 60 * 60 * 1000));\n    \n    node.warn(`   ⏰ LIMITE: ${cutoff.toLocaleString('fr-FR')}`);\n    node.warn(`   ⏰ ARTICLE: ${article_date.toLocaleString('fr-FR')}`);\n    \n    if (article_date < cutoff) {\n        session.skipped_count++;\n        global.set('session_stats', session);\n        node.warn(`   ❌ TROP ANCIEN (>${config.hours_lookback}h)`);\n        return null;\n    }\n    node.warn(\"   ✅ DANS LA PÉRIODE\");\n}\n\n// Article validé\nconfig.processed_articles.add(unique_id);\nsession.processed_count++;\n\n// Nettoyage cache\nif (config.processed_articles.size > 500) {\n    var articles_array = Array.from(config.processed_articles);\n    config.processed_articles = new Set(articles_array.slice(-300));\n}\n\n// Sauvegarder\nglobal.set('pipeline_config', config);\nglobal.set('session_stats', session);\n\nnode.warn(`✅ ARTICLE VALIDÉ ${session.processed_count}/${session.max_articles}`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 970,
+        "y": 320,
+        "wires": [
+            [
+                "b8524d09134466d9"
+            ]
+        ]
+    }
+]

@@ -1,0 +1,62 @@
+[
+    {
+        "id": "auto_trigger_http",
+        "type": "http in",
+        "z": "main_flow",
+        "name": "Auto Pipeline Trigger",
+        "url": "/inject/rss-pipeline-start",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 100,
+        "wires": [["trigger_pipeline"]]
+    },
+    {
+        "id": "trigger_pipeline", 
+        "type": "inject",
+        "z": "main_flow",
+        "name": "Trigger RSS Pipeline",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Pipeline démarré automatiquement",
+        "payloadType": "str",
+        "x": 350,
+        "y": 100,
+        "wires": [["pipeline_start"]]
+    },
+    {
+        "id": "auto_response",
+        "type": "http response",
+        "z": "main_flow", 
+        "name": "Auto Response",
+        "statusCode": "200",
+        "headers": {},
+        "x": 550,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "response_payload",
+        "type": "function",
+        "z": "main_flow",
+        "name": "Prepare Response",
+        "func": "msg.payload = {\n    status: 'success',\n    message: 'RSS Pipeline démarré automatiquement',\n    timestamp: new Date().toISOString()\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 140,
+        "wires": [["auto_response"]]
+    }
+]

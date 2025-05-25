@@ -1,0 +1,43 @@
+{
+  "sources": [
+    {
+      "name": "01net",
+      "url": "https://www.01net.com/rss/actualites/",
+      "category": "",
+      "keywords": ["technology", "news"],
+      "title_extraction": ""
+    }
+  ],
+  "categories": {
+    "ia": {
+      "label": "Intelligence Artificielle",
+      "keywords": ["ai", "artificial intelligence", "machine learning", "deep learning", "neural", "gpt", "llm"],
+      "color": "#FF6B6B"
+    },
+    "dev": {
+      "label": "Développement", 
+      "keywords": ["api", "code", "programming", "software", "development", "github"],
+      "color": "#4ECDC4"
+    },
+    "business": {
+      "label": "Business & Stratégie",
+      "keywords": ["business", "partnership", "investment", "company", "market"],
+      "color": "#45B7D1"
+    },
+    "cloud": {
+      "label": "Cloud & Infrastructure",
+      "keywords": ["cloud", "infrastructure", "server", "aws", "azure", "docker"],
+      "color": "#96CEB4"
+    },
+    "securite": {
+      "label": "Sécurité",
+      "keywords": ["security", "safety", "privacy", "protection", "secure"],
+      "color": "#FECA57"
+    },
+    "autre": {
+      "label": "Autres",
+      "keywords": [],
+      "color": "#A0A0A0"
+    }
+  }
+}
