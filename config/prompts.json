@@ -1,14 +1,105 @@
 {
+  "_metadata": {
+    "version": "2.0_configurable",
+    "last_updated": "2025-05-25",
+    "description": "Prompts modulaires pour LLM Anti-Fraude",
+    "language": "français",
+    "compatibility": "app.py v2.0_configurable"
+  },
+
   "classification_v2": {
-    "prompt": "Analyse cet article et classe-le dans UN domaine parmi : veille_fraude, innovation_tech, finance_crypto, actualite_tech.\n\nCritères v2.0 :\n- veille_fraude : Cybersécurité, fraudes, attaques, vulnérabilités\n- innovation_tech : IA, blockchain, recherche, technologies émergentes\n- finance_crypto : Cryptomonnaies, marchés financiers, DeFi, régulation\n- actualite_tech : Startups, business tech, produits, acquisitions\n\nTitre: {title}\nContenu: {content}\nSource: {source}\n\nDomaine (un seul mot):",
-    "version": "2.0"
+    "prompt": "Analyse cet article de veille anti-fraude et classe-le dans UN domaine parmi :\n\n🔍 DOMAINES DISPONIBLES :\n- fraude_investissement : Arnaques aux placements, crypto-fraudes, Ponzi\n- fraude_paiement : Cartes, virements, phishing bancaire, skimming\n- fraude_president_cyber : FOVI, CEO fraud, usurpation dirigeants\n- fraude_ecommerce : E-commerce, chargebacks, marketplace\n- supply_chain_cyber : Fournisseurs, logistique, tiers de confiance\n- intelligence_economique : Veille stratégique, géopolitique, compliance\n- fraude_crypto : Cryptomonnaies, DeFi, blockchain, NFT\n- cyber_investigations : Enquêtes, forensic, threat intel\n\n📊 ARTICLE À ANALYSER :\nTitre: {title}\nContenu: {content}\nSource: {source}\n\n✅ RÉPONSE ATTENDUE :\nDomaine (un seul mot): ",
+    "version": "2.0",
+    "context": "fraud_detection",
+    "output_format": "single_word"
   },
+
   "summarization_v2": {
-    "prompt": "Crée un résumé structuré de cet article en français pour le domaine {domain} :\n\nTitre: {title}\nContenu: {content}\n\nFormat adapté au domaine :\n• **Point clé 1** : [Idée principale]\n• **Impact** : [Conséquences/Applications]\n• **Action** : [Recommandation]\n\nRésumé structuré :",
-    "version": "2.0"
+    "prompt": "Crée un résumé structuré en français pour cet article du domaine {domain}.\n\n📋 ARTICLE :\nTitre: {title}\nContenu: {content}\n\n🎯 FORMAT REQUIS :\n• **Analyse** : [Point clé principal en 1 phrase]\n• **Impact** : [Conséquences ou enjeux identifiés]\n• **Action** : [Recommandation ou suivi nécessaire]\n• **Évaluation** : [Niveau de criticité et pertinence]\n\n⚠️ CONTRAINTES :\n- Maximum 200 mots\n- Langage professionnel\n- Focus sur les aspects anti-fraude\n- Éviter la redondance avec le titre\n\nRésumé structuré :",
+    "version": "2.0",
+    "context": "fraud_analysis",
+    "max_tokens": 200
   },
+
   "obsidian_links": {
-    "prompt": "Extrait 3-5 concepts clés de cet article pour créer des liens Obsidian [[]].\n\nTitre: {title}\nContenu: {content}\nDomaine: {domain}\n\nConcepts (format: Concept1, Concept2, ...):",
-    "version": "2.0"
+    "prompt": "Extrait 3-5 concepts clés de cet article pour créer des liens Obsidian [[concept]].\n\n📄 ARTICLE :\nTitre: {title}\nContenu: {content}\nDomaine: {domain}\n\n🎯 OBJECTIF :\nIdentifier les concepts les plus pertinents pour la veille anti-fraude qui méritent d'être liés dans Obsidian.\n\n✅ CRITÈRES :\n- Concepts techniques ou méthodologiques\n- Entités importantes (organisations, technologies)\n- Thématiques transversales\n- Éviter les concepts trop génériques\n\n📝 FORMAT :\nConcepts (séparés par des virgules): ",
+    "version": "2.0",
+    "context": "knowledge_linking",
+    "output_format": "comma_separated"
+  },
+
+  "domain_specific_prompts": {
+    "analysis_investment_fraud": {
+      "prompt": "Analyse cette fraude aux investissements :\n\n{title}\n{content}\n\n🔍 Points d'analyse spécifiques :\n• **Mécanisme** : Comment fonctionne l'arnaque ?\n• **Cibles** : Qui sont les victimes visées ?\n• **Indicateurs** : Signaux d'alerte identifiables\n• **Prévention** : Mesures de protection\n\nAnalyse détaillée :",
+      "context": "investment_fraud_analysis"
+    },
+    "analysis_payment_fraud": {
+      "prompt": "Analyse cette fraude aux moyens de paiement :\n\n{title}\n{content}\n\n💳 Points d'analyse spécifiques :\n• **Technique** : Méthode d'attaque utilisée\n• **Vecteur** : Canal ou dispositif compromis\n• **Détection** : Moyens d'identification\n• **Mitigation** : Solutions de protection\n\nAnalyse technique :",
+      "context": "payment_fraud_analysis"
+    },
+    "analysis_ceo_fraud": {
+      "prompt": "Analyse cette fraude au président/FOVI :\n\n{title}\n{content}\n\n🎭 Points d'analyse spécifiques :\n• **Scénario** : Stratégie de manipulation utilisée\n• **Ingénierie sociale** : Techniques psychologiques\n• **Prétexte** : Justification invoquée\n• **Formation** : Sensibilisation recommandée\n\nAnalyse comportementale :",
+      "context": "ceo_fraud_analysis"
+    },
+    "analysis_crypto_fraud": {
+      "prompt": "Analyse cette fraude crypto :\n\n{title}\n{content}\n\n₿ Points d'analyse spécifiques :\n• **Protocole** : Blockchain ou token impliqué\n• **Mécanisme** : Type d'arnaque (rugpull, Ponzi, etc.)\n• **Montant** : Estimation des pertes\n• **Traçabilité** : Possibilité de suivi on-chain\n\nAnalyse blockchain :",
+      "context": "crypto_fraud_analysis"
+    }
+  },
+
+  "alert_generation": {
+    "critical_alert": {
+      "prompt": "🚨 ALERTE CRITIQUE 🚨\n\nGénère une alerte de sécurité pour :\n{title}\n\n📋 Informations :\n{content}\n\n⚡ Format alerte critique :\n• **MENACE** : [Description en 1 phrase]\n• **URGENCE** : [Pourquoi c'est critique]\n• **ACTIONS** : [Mesures immédiates à prendre]\n• **DIFFUSION** : [Qui prévenir]\n\nAlerte sécurité :",
+      "context": "critical_security_alert"
+    },
+    "trend_analysis": {
+      "prompt": "Analyse cette tendance émergente :\n{title}\n{content}\n\n📈 Analyse de tendance :\n• **Émergence** : Nouveauté ou évolution ?\n• **Ampleur** : Portée géographique/sectorielle\n• **Évolution** : Projection court/moyen terme\n• **Préparation** : Adaptations recommandées\n\nAnalyse prospective :",
+      "context": "trend_analysis"
+    }
+  },
+
+  "multilingual_support": {
+    "language_detection": {
+      "prompt": "Détecte la langue principale de ce texte et indique si une traduction en français est nécessaire :\n\n{content}\n\nRéponse (fr/en/autre + traduction_requise): ",
+      "context": "language_detection"
+    },
+    "translation_prompt": {
+      "prompt": "Traduis ce contenu en français professionnel, en conservant les termes techniques appropriés :\n\n{content}\n\nTraduction française :",
+      "context": "professional_translation"
+    }
+  },
+
+  "quality_control": {
+    "content_validation": {
+      "prompt": "Évalue la qualité et pertinence de cet article pour la veille anti-fraude :\n\n{title}\n{content}\n\n🎯 Critères d'évaluation :\n• **Pertinence** : Lien avec anti-fraude (1-10)\n• **Qualité** : Richesse informative (1-10)\n• **Actualité** : Fraîcheur de l'info (1-10)\n• **Actionnable** : Utilité opérationnelle (1-10)\n\nÉvaluation (format: pertinence:X, qualité:X, actualité:X, actionnable:X): ",
+      "context": "quality_assessment"
+    },
+    "duplicate_detection": {
+      "prompt": "Compare ces deux articles et détermine s'ils traitent du même sujet :\n\nArticle 1: {title1}\n{content1}\n\nArticle 2: {title2}\n{content2}\n\nSimilarité (identique/similaire/différent): ",
+      "context": "duplicate_detection"
+    }
+  },
+
+  "moc_generation": {
+    "daily_briefing": {
+      "prompt": "Crée un briefing quotidien anti-fraude basé sur ces articles :\n\n{articles_summary}\n\n📊 BRIEFING DU {date} :\n\n## 🚨 Alertes Prioritaires\n[Articles critiques/urgents]\n\n## 📈 Tendances Observées\n[Évolutions notables]\n\n## 🎯 Actions Recommandées\n[Mesures suggérées]\n\n## 📋 Veille Continue\n[Points de surveillance]\n\nBriefing structuré :",
+      "context": "daily_intelligence_briefing"
+    },
+    "weekly_summary": {
+      "prompt": "Synthèse hebdomadaire anti-fraude :\n\n{week_articles}\n\n📅 SYNTHÈSE SEMAINE {week_number} :\n\n## 🎯 Faits Marquants\n## 📊 Statistiques\n## 🔍 Analyses\n## ⚡ Recommandations\n\nSynthèse hebdomadaire :",
+      "context": "weekly_intelligence_summary"
+    }
+  },
+
+  "system_prompts": {
+    "expert_persona": "Tu es un expert en cybersécurité et lutte anti-fraude. Tes analyses sont précises, factuelles et orientées action. Tu utilises un vocabulaire professionnel adapté au secteur financier et de la sécurité.",
+    "response_style": "Réponses concises, structurées et directement exploitables. Évite les généralités et privilégie les insights actionnables.",
+    "domain_expertise": "Spécialisation en : fraudes financières, cybersécurité, ingénierie sociale, cryptomonnaies, compliance, investigation numérique."
+  },
+
+  "templates": {
+    "markdown_article": {
+      "structure": "---\ntitle: {title}\ndomain: {domain}\nalert_level: {alert_level}\ndate: {date}\nsource: {source}\ntags: {tags}\nconcepts: {concepts}\n---\n\n# {title}\n\n## 📊 Métadonnées\n- **Domaine** : {domain_label} {emoji}\n- **Niveau** : {alert_level}\n- **Source** : {source}\n- **Date** : {date}\n\n## 📝 Résumé\n{summary}\n\n## 🔗 Concepts Liés\n{obsidian_links}\n\n## 🏷️ Tags\n{strategic_tags}\n\n---\n*Analyse automatique - Pipeline RSS+LLM v2.0*"
+    }
   }
 }
