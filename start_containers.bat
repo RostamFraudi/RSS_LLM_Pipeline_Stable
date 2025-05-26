@@ -28,7 +28,7 @@ set RESET=[0m
 
 echo %YELLOW%🐳 Demarrage conteneurs existants...%RESET%
 
-docker start rss_llm_service rss_nodered
+docker start rss_llm_service_v3 rss_nodered
 
 if %errorlevel% neq 0 (
     echo %RED%❌ Echec demarrage conteneurs%RESET%

@@ -13,7 +13,7 @@ echo Architecture: %PROCESSOR_ARCHITECTURE%
 echo.
 
 :: Verifications systeme
-echo [1/7] Verification Docker...
+echo [1/6] Verification Docker...
 docker --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo Docker non detecte
@@ -22,7 +22,7 @@ if %errorlevel% neq 0 (
 )
 echo Docker OK
 
-echo [2/7] Verification Docker Compose...
+echo [2/6] Verification Docker Compose...
 docker-compose --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo Docker Compose manquant
@@ -31,7 +31,7 @@ if %errorlevel% neq 0 (
 echo Docker Compose OK
 
 :: Verification structure portable
-echo [3/7] Verification structure...
+echo [3/6] Verification structure...
 if not exist "docker_service\docker-compose.yml" (
     echo Structure incorrecte - docker-compose.yml manquant
     echo Attendu: docker_service\docker-compose.yml
@@ -43,33 +43,14 @@ if not exist "config\sources.json" (
 )
 echo Structure validee
 
-:: Creation dossiers portables
-echo [4/7] Preparation environnement...
-for %%d in (
-    "node_red_data"
-    "obsidian_vault\articles\veille_fraude"
-    "obsidian_vault\articles\innovation_tech"
-    "obsidian_vault\articles\finance_crypto"
-    "obsidian_vault\articles\actualite_tech"
-    "obsidian_vault\articles\ia"
-    "obsidian_vault\articles\dev"
-    "obsidian_vault\articles\business"
-    "obsidian_vault\articles\cloud"
-    "obsidian_vault\articles\securite"
-    "obsidian_vault\articles\autre"
-) do (
-    if not exist "%%d" mkdir "%%d" >nul 2>&1
-)
-echo Environnement prepare
-
 :: Nettoyage services existants
-echo [5/7] Nettoyage services...
+echo [4/6] Nettoyage services...
 cd docker_service
 docker-compose down -v >nul 2>&1
 echo Nettoyage termine
 
-echo [6/7] Options demarrage...
-echo Voulez-vous un nettoyage Docker complet ? (y/N)
+echo [5/6] Options demarrage...
+echo Voulez-vous un nettoyage Docker complet ATTENTION choix lourd de conséquence !? (y/N)
 set /p cleanup="Reponse: "
 if /i "%cleanup%"=="y" (
     echo Nettoyage Docker...
@@ -78,7 +59,7 @@ if /i "%cleanup%"=="y" (
 )
 
 :: Demarrage services
-echo [7/7] Lancement pipeline...
+echo [6/6] Lancement pipeline...
 echo.
 echo Demarrage (3-5 min pour premier build)
 echo Patience pendant telechargement modeles...

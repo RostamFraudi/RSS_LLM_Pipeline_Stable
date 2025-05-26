@@ -1,50 +1,56 @@
 version: '3.8'
 
 services:
-  llm-service:
+  # Service LLM v3 avec vrais modèles
+  llm-service-v3:
     build: 
       context: ./llm_service
-      dockerfile: Dockerfile
-    container_name: rss_llm_service
+      dockerfile: Dockerfile_v3
+    container_name: rss_llm_service_v3
     ports:
-      - "15000:5000"
+      - "15000:5000" 
     volumes:
       - ../config:/config:ro
+      - llm_cache:/app/cache  # Cache persistant pour les modèles
     environment:
-      - PYTHONUNBUFFERED=1
       - FLASK_ENV=production
+      - TRANSFORMERS_OFFLINE=0
+      - TRANSFORMERS_CACHE=/app/cache
+    networks:
+      - rss_network
     restart: unless-stopped
+    mem_limit: 4g  # Les modèles nécessitent plus de RAM
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
-      timeout: 15s
-      retries: 10
-      start_period: 180s
-    deploy:
-      resources:
-        limits:
-          memory: 4G
-        reservations:
-          memory: 2G
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
+  # Node-RED (inchangé, mais pointera vers le nouveau service)
   nodered:
-    build:
-      context: ./nodered_custom
-      dockerfile: Dockerfile
+    build: ./nodered_custom
     container_name: rss_nodered
     ports:
       - "18880:1880"
     volumes:
       - ../node_red_data:/data
+      - ../config:/config
       - ../obsidian_vault:/obsidian_vault
-      - ../config:/config:ro
     environment:
       - TZ=Europe/Paris
-      - NODE_RED_ENABLE_PROJECTS=true
+      - NODE_RED_ENABLE_PROJECTS=false
+      - LLM_SERVICE_URL=http://llm-service-v3:5000  # Pointe vers v3
+    networks:
+      - rss_network
     depends_on:
-      - llm-service
+      - llm-service-v3
     restart: unless-stopped
 
 networks:
-  default:
-    name: rss_llm_network
+  rss_network:
+    driver: bridge
+
+volumes:
+  llm_cache:
+    driver: local

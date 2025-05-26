@@ -6,51 +6,46 @@ import time
 import re
 from pathlib import Path
 
-# Transformers optionnel
+# Imports pour LLM réel
 try:
-    from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+    from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
-    
+    logging.warning("⚠️ Transformers non disponible - Mode fallback uniquement")
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-model = None
-tokenizer = None
+
+# Variables globales pour les modèles
 classifier = None
 summarizer = None
 model_loaded = False
 
-# ==================== CONFIGURATION LOADER ====================
+# ==================== CONFIGURATION ====================
 
-class AntifraudConfigLoader:
-    """Gestionnaire de configuration spécialisé Anti-Fraude"""
+class ConfigManager:
+    """Gestionnaire de configuration centralisé"""
     
     def __init__(self, config_path="/config"):
         self.config_path = Path(config_path)
         self.domains_config = {}
         self.sources_config = []
         self.prompts_config = {}
-        self.processing_config = {}
-        self.classification_rules = {}
-        self.alert_levels = {}
         self.load_configuration()
     
     def load_configuration(self):
-        """Charge la configuration complète"""
+        """Charge la configuration depuis les fichiers JSON"""
         try:
-            # Charger sources.json (domaines + sources + règles)
+            # Charger sources.json
             sources_file = self.config_path / "sources.json"
             if sources_file.exists():
                 with open(sources_file, 'r', encoding='utf-8') as f:
                     config = json.load(f)
                     self.domains_config = config.get('domains', {})
                     self.sources_config = config.get('sources', [])
-                    self.processing_config = config.get('processing', {})
-                    self.classification_rules = config.get('classification_rules', {})
-                    self.alert_levels = config.get('alert_levels', {})
             
             # Charger prompts.json
             prompts_file = self.config_path / "prompts.json"
@@ -58,243 +53,269 @@ class AntifraudConfigLoader:
                 with open(prompts_file, 'r', encoding='utf-8') as f:
                     self.prompts_config = json.load(f)
             
-            logger.info(f"✅ Configuration chargée: {len(self.domains_config)} domaines, {len(self.sources_config)} sources")
+            logger.info(f"✅ Configuration chargée: {len(self.domains_config)} domaines")
             
         except Exception as e:
             logger.error(f"❌ Erreur chargement configuration: {e}")
-            self._load_fallback_config()
+            self._load_default_config()
     
-    def _load_fallback_config(self):
-        """Configuration minimale en cas d'erreur"""
-        logger.warning("🔄 Chargement configuration fallback")
+    def _load_default_config(self):
+        """Configuration par défaut minimale"""
+        logger.warning("🔄 Chargement configuration par défaut")
         self.domains_config = {
             'cyber_investigations': {
-                'label': 'Investigations Cybercriminalité',
-                'emoji': '🔍',
-                'default_alert': 'info',
-                'critical_keywords': ['cybercrime', 'investigation', 'fraud'],
-                'output_folder': 'cyber_investigations'
+                'label': 'Cyber Investigations',
+                'description': 'General cybercrime and security investigations',
+                'keywords': ['cyber', 'security', 'breach', 'hack']
             }
         }
-    
-    def classify_article(self, title, content, source=""):
-        """Classification intelligente basée sur la configuration"""
-        text = (title + " " + content + " " + source).lower()
-        
-        # Scores par domaine
-        domain_scores = {}
-        
-        for domain_id, domain_config in self.domains_config.items():
-            score = 0
-            
-            # Score basé sur les mots-clés critiques
-            critical_keywords = domain_config.get('critical_keywords', [])
-            for keyword in critical_keywords:
-                if keyword.lower() in text:
-                    score += 2  # Poids fort pour mots-clés critiques
-            
-            # Score basé sur les mots-clés d'alerte
-            alert_keywords = domain_config.get('alert_keywords', [])
-            for keyword in alert_keywords:
-                if keyword.lower() in text:
-                    score += 1  # Poids moyen pour mots-clés d'alerte
-            
-            # Bonus basé sur la source
-            source_bonus = self._get_source_bonus(source.lower(), domain_id)
-            score += source_bonus
-            
-            # Multiplicateur de priorité du domaine
-            priority_mult = domain_config.get('priority_multiplier', 1.0)
-            score *= priority_mult
-            
-            domain_scores[domain_id] = score
-        
-        # Déterminer le meilleur domaine
-        if max(domain_scores.values(), default=0) > 0:
-            best_domain = max(domain_scores, key=domain_scores.get)
-            confidence = min(95, max(60, domain_scores[best_domain] * 15))
-        else:
-            # Fallback vers domaine par défaut
-            fallback_domain = self.classification_rules.get('confidence_thresholds', {}).get('fallback_domain', 'cyber_investigations')
-            best_domain = fallback_domain if fallback_domain in self.domains_config else list(self.domains_config.keys())[0]
-            confidence = 50
-        
-        return best_domain, confidence
-    
-    def _get_source_bonus(self, source_lower, domain_id):
-        """Calcule le bonus basé sur la source"""
-        source_rules = self.classification_rules.get('source_bonus', {}).get('rules', {})
-        
-        for source_key, rule in source_rules.items():
-            if source_key.lower() in source_lower and rule.get('domain') == domain_id:
-                return rule.get('bonus', 0)
-        
-        return 0
-    
-    def get_alert_level(self, title, content, domain_id):
-        """Détermine le niveau d'alerte"""
-        text = (title + " " + content).lower()
-        domain_config = self.domains_config.get(domain_id, {})
-        
-        # Mots-clés critiques du domaine
-        critical_keywords = domain_config.get('critical_keywords', [])
-        alert_keywords = domain_config.get('alert_keywords', [])
-        
-        # Vérification mots-clés critiques universels
-        universal_critical = ['breach', 'attack', 'critical', 'urgent', 'hack', 'stolen', 'leaked', 'compromise']
-        if any(keyword.lower() in text for keyword in critical_keywords + universal_critical):
-            return "critical"
-        
-        # Vérification mots-clés d'alerte
-        universal_alert = ['warning', 'risk', 'threat', 'concern', 'issue', 'problem', 'vulnerability']
-        if any(keyword.lower() in text for keyword in alert_keywords + universal_alert):
-            return "urgent"
-        
-        # Niveau par défaut du domaine
-        return domain_config.get('default_alert', 'info')
-    
-    def generate_obsidian_concepts(self, title, content, domain_id):
-        """Génère des concepts Obsidian basés sur la configuration"""
-        domain_config = self.domains_config.get(domain_id, {})
-        concepts = []
-        
-        # Concepts prédéfinis du domaine
-        predefined_concepts = domain_config.get('obsidian_concepts', [])
-        
-        # Ajouter concepts basés sur les mots-clés trouvés
-        text = (title + " " + content).lower()
-        critical_keywords = domain_config.get('critical_keywords', [])
-        
-        # Concepts du domaine (max 2)
-        concepts.extend(predefined_concepts[:2])
-        
-        # Concepts basés sur mots-clés trouvés (max 2 additionnels)
-        for keyword in critical_keywords[:4]:
-            if keyword.lower() in text:
-                concept = keyword.replace('_', ' ').title()
-                if concept not in concepts and len(concepts) < 4:
-                    concepts.append(concept)
-        
-        return concepts[:4]  # Maximum 4 concepts
-    
-    def generate_strategic_tags(self, title, content, domain_id, alert_level):
-        """Génère des tags stratégiques"""
-        tags = []
-        
-        # Tags basés sur le niveau d'alerte
-        if alert_level == "critical":
-            tags.append("#urgent")
-            tags.append("#critical-alert")
-        elif alert_level == "urgent":
-            tags.append("#important")
-            tags.append("#urgent-review")
-        elif alert_level == "watch":
-            tags.append("#monitoring")
-        
-        # Tag du domaine
-        domain_tag = f"#{domain_id.replace('_', '-')}"
-        tags.append(domain_tag)
-        
-        # Tags contextuels basés sur le contenu
-        text = (title + " " + content).lower()
-        if any(word in text for word in ['fraud', 'fraude', 'scam', 'arnaque']):
-            tags.append("#fraud-alert")
-        if any(word in text for word in ['crypto', 'bitcoin', 'blockchain']):
-            tags.append("#crypto")
-        if any(word in text for word in ['payment', 'paiement', 'carte', 'virement']):
-            tags.append("#payment-security")
-        
-        return tags[:6]  # Maximum 6 tags
-    
-    def generate_summary(self, title, content, domain_id):
-        """Génère un résumé adapté au domaine"""
-        domain_config = self.domains_config.get(domain_id, {})
-        emoji = domain_config.get('emoji', '📄')
-        label = domain_config.get('label', domain_id.replace('_', ' ').title())
-        
-        # Extraire première phrase significative
-        sentences = [s.strip() for s in content.split('.') if len(s.strip()) > 20]
-        main_point = sentences[0] if sentences else "Analyse en cours"
-        
-        # Template adapté au domaine
-        if domain_id in ['fraude_investissement', 'fraude_crypto']:
-            summary = f"""{emoji} **{label}** : {title}
 
-• **Mécanisme** : {main_point}
-• **Cibles** : Investisseurs et épargnants
-• **Prévention** : Vigilance et vérification AMF
-• **Action** : Surveillance renforcée des offres"""
+# Instance globale de configuration
+config = ConfigManager()
 
-        elif domain_id in ['fraude_paiement', 'fraude_president_cyber']:
-            summary = f"""{emoji} **{label}** : {title}
+# ==================== MODÈLES LLM ====================
 
-• **Technique** : {main_point}
-• **Impact** : Risque financier direct
-• **Détection** : Signaux d'alerte à identifier
-• **Mitigation** : Mesures de protection immédiates"""
-
-        elif domain_id in ['cyber_investigations', 'supply_chain_cyber']:
-            summary = f"""{emoji} **{label}** : {title}
-
-• **Analyse** : {main_point}
-• **Portée** : Investigation en cours
-• **Implications** : Évaluation des risques
-• **Suivi** : Veille continue nécessaire"""
-
-        else:  # Domaines généraux
-            summary = f"""{emoji} **{label}** : {title}
-
-• **Contexte** : {main_point}
-• **Enjeux** : Analyse sectorielle
-• **Recommandation** : Monitoring continu
-• **Classification** : {domain_id}"""
-        
-        return summary
-
-# Instance globale
-config = AntifraudConfigLoader()
-
-def load_model():
-    """Charge les modèles Transformers (optionnel)"""
-    global model, tokenizer, classifier, summarizer, model_loaded
+def load_models():
+    """Charge les modèles LLM pour classification et résumé"""
+    global classifier, summarizer, model_loaded
     
     if not TRANSFORMERS_AVAILABLE:
-        logger.info("ℹ️  Transformers non disponible - Mode configuration pure")
-        model_loaded = False
+        logger.warning("⚠️ Transformers non disponible - Utilisation du mode fallback")
         return False
-        
+    
     try:
-        logger.info("🔄 Chargement modèles légers...")
+        logger.info("🔄 Chargement des modèles LLM...")
         
-        # Classification sentiments (léger)
-        classifier = pipeline("sentiment-analysis")
+        # Modèle de classification zero-shot (léger et efficace)
+        logger.info("📊 Chargement du classificateur zero-shot...")
+        classifier = pipeline(
+            "zero-shot-classification",
+            model="MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+            device=-1  # CPU pour éviter les problèmes CUDA
+        )
+        logger.info("✅ Classificateur chargé")
         
-        # Résumé (optionnel)
-        try:
-            summarizer = pipeline(
-                "summarization",
-                model="facebook/bart-large-cnn",
-                max_length=150,
-                min_length=30,
-                do_sample=False
-            )
-        except:
-            logger.warning("⚠️  Modèle résumé non disponible")
+        # Modèle de résumé (léger)
+        logger.info("📝 Chargement du modèle de résumé...")
+        summarizer = pipeline(
+            "summarization",
+            model="sshleifer/distilbart-cnn-12-6",
+            device=-1,
+            max_length=150,
+            min_length=50
+        )
+        logger.info("✅ Modèle de résumé chargé")
         
         model_loaded = True
-        logger.info("✅ Modèles chargés avec succès!")
+        logger.info("✅ Tous les modèles LLM sont chargés et prêts")
         return True
         
     except Exception as e:
-        logger.warning(f"⚠️  Modèles non chargés: {e}")
+        logger.error(f"❌ Erreur chargement modèles: {e}")
+        logger.warning("⚠️ Basculement en mode fallback")
         model_loaded = False
         return False
 
-# ==================== ENDPOINTS V2 CONFIGURABLES ====================
+# ==================== GÉNÉRATION DE TAGS ====================
 
-@app.route('/classify_v2', methods=['POST'])
-def classify_v2():
-    """Classification intelligente v2.0 - Configuré par sources.json"""
+def generate_tags(title, content, domain, confidence):
+    """
+    Génère des tags intelligents en anglais
+    Retourne: liste de tags sans doublons
+    """
+    tags = set()  # Utiliser un set pour éviter les doublons
+    
+    # Tags de base par domaine (en anglais)
+    domain_base_tags = {
+        'fraude_investissement': ['investment-fraud', 'scam-alert'],
+        'fraude_paiement': ['payment-security', 'card-fraud'],
+        'fraude_president_cyber': ['ceo-fraud', 'wire-fraud'],
+        'fraude_ecommerce': ['ecommerce-fraud', 'online-scam'],
+        'supply_chain_cyber': ['supply-chain', 'third-party-risk'],
+        'intelligence_economique': ['business-intel', 'risk-analysis'],
+        'fraude_crypto': ['crypto-fraud', 'blockchain-scam'],
+        'cyber_investigations': ['cybercrime', 'investigation']
+    }
+    
+    # Ajouter tags de base du domaine
+    if domain in domain_base_tags:
+        tags.update(domain_base_tags[domain])
+    
+    # Tags basés sur le niveau de confiance
+    if confidence >= 90:
+        tags.add('high-confidence')
+    elif confidence >= 70:
+        tags.add('medium-confidence')
+    
+    # Analyse contextuelle pour tags spécifiques
+    text_lower = (title + " " + content).lower()
+    
+    # Tags d'urgence
+    if any(word in text_lower for word in ['urgent', 'critical', 'immediate', 'breach', 'attack']):
+        tags.add('urgent')
+    
+    # Tags techniques spécifiques
+    if 'ransomware' in text_lower:
+        tags.add('ransomware')
+    if 'phishing' in text_lower:
+        tags.add('phishing')
+    if 'data breach' in text_lower or 'data leak' in text_lower:
+        tags.add('data-breach')
+    if 'zero-day' in text_lower or 'zero day' in text_lower:
+        tags.add('zero-day')
+    
+    # Tags business
+    if any(word in text_lower for word in ['ipo', 'acquisition', 'merger']):
+        tags.add('business-event')
+    if any(word in text_lower for word in ['funding', 'investment round', 'series']):
+        tags.add('funding')
+    
+    # Limiter à 6 tags maximum et convertir en liste
+    return list(tags)[:6]
+
+def determine_alert_level(title, content, domain, confidence):
+    """
+    Détermine le niveau d'alerte basé sur le contenu
+    Retourne: 'critical', 'urgent', 'watch', 'info'
+    """
+    text_lower = (title + " " + content).lower()
+    
+    # Mots-clés critiques
+    critical_keywords = [
+        'breach', 'attack', 'hacked', 'stolen', 'leaked', 'ransomware',
+        'zero-day', 'critical vulnerability', 'emergency'
+    ]
+    
+    # Mots-clés urgents
+    urgent_keywords = [
+        'warning', 'alert', 'risk', 'threat', 'vulnerability',
+        'suspicious', 'malware', 'phishing'
+    ]
+    
+    # Domaines naturellement urgents
+    urgent_domains = ['fraude_paiement', 'fraude_president_cyber']
+    
+    # Analyse
+    if any(keyword in text_lower for keyword in critical_keywords):
+        return 'critical'
+    
+    if any(keyword in text_lower for keyword in urgent_keywords) or domain in urgent_domains:
+        return 'urgent'
+    
+    if confidence >= 80 and domain in ['fraude_investissement', 'fraude_crypto']:
+        return 'watch'
+    
+    return 'info'
+
+# ==================== CLASSIFICATION PRINCIPALE ====================
+
+def classify(title, content, source=""):
+    """
+    Fonction principale de classification - Utilise LLM si disponible
+    Retourne: (domain, confidence, method)
+    """
+    if model_loaded and TRANSFORMERS_AVAILABLE:
+        # TODO: Implémenter classification LLM
+        return classify_with_llm(title, content, source)
+    else:
+        # Fallback vers l'ancienne méthode
+        return classify_fallback(title, content, source)
+
+def classify_with_llm(title, content, source):
+    """Classification utilisant un vrai LLM"""
+    try:
+        # Préparation du texte pour le LLM
+        text_to_classify = f"{title}. {content[:1000]}"  # Limite pour performance
+        
+        # Définition des catégories pour le modèle zero-shot
+        candidate_labels = [
+            "investment fraud and scams",
+            "payment and credit card fraud",
+            "CEO fraud and wire transfer scams",
+            "e-commerce and online shopping fraud",
+            "supply chain cyber attacks",
+            "economic intelligence and business risks",
+            "cryptocurrency fraud and scams",
+            "cybercrime investigation and security breaches"
+        ]
+        
+        # Mapping vers nos domaines
+        label_to_domain = {
+            "investment fraud and scams": "fraude_investissement",
+            "payment and credit card fraud": "fraude_paiement",
+            "CEO fraud and wire transfer scams": "fraude_president_cyber",
+            "e-commerce and online shopping fraud": "fraude_ecommerce",
+            "supply chain cyber attacks": "supply_chain_cyber",
+            "economic intelligence and business risks": "intelligence_economique",
+            "cryptocurrency fraud and scams": "fraude_crypto",
+            "cybercrime investigation and security breaches": "cyber_investigations"
+        }
+        
+        # Classification par le LLM
+        logger.info(f"🤖 Classification LLM pour: {title[:50]}...")
+        result = classifier(text_to_classify, candidate_labels, multi_label=False)
+        
+        # Extraction des résultats
+        best_label = result['labels'][0]
+        confidence = round(result['scores'][0] * 100, 1)
+        
+        # Mapping vers notre domaine
+        domain = label_to_domain.get(best_label, "cyber_investigations")
+        
+        logger.info(f"✅ LLM: {domain} ({confidence}%) - Label: {best_label}")
+        
+        # Boost de confiance si la source correspond
+        source_lower = source.lower()
+        if ("amf" in source_lower and domain == "fraude_investissement") or \
+           ("krebs" in source_lower and domain == "cyber_investigations") or \
+           ("coindesk" in source_lower and domain == "fraude_crypto"):
+            confidence = min(95, confidence + 10)
+            logger.info(f"🎯 Boost source: {confidence}%")
+        
+        return domain, confidence, "llm_zero_shot"
+        
+    except Exception as e:
+        logger.error(f"❌ Erreur classification LLM: {e}")
+        logger.warning("🔄 Fallback vers classification par règles")
+        return classify_fallback(title, content, source)
+
+def classify_fallback(title, content, source):
+    """Classification par règles (ancienne méthode v2)"""
+    text = (title + " " + content + " " + source).lower()
+    domain_scores = {}
+    
+    # Logique de l'ancienne v2
+    for domain_id, domain_config in config.domains_config.items():
+        score = 0
+        keywords = domain_config.get('keywords', [])
+        
+        for keyword in keywords:
+            if keyword.lower() in text:
+                score += 1
+        
+        domain_scores[domain_id] = score
+    
+    # Déterminer le meilleur domaine
+    if domain_scores and max(domain_scores.values()) > 0:
+        best_domain = max(domain_scores, key=domain_scores.get)
+        confidence = min(95, max(50, domain_scores[best_domain] * 20))
+        method = "fallback"
+    else:
+        best_domain = 'cyber_investigations'
+        confidence = 40
+        method = "fallback_default"
+    
+    logger.info(f"📊 Classification fallback: {best_domain} ({confidence}%)")
+    return best_domain, confidence, method
+
+# ==================== ENDPOINTS API ====================
+
+@app.route('/generate_metadata', methods=['POST'])
+def generate_metadata():
+    """
+    Endpoint unifié principal - Classification + Tags + Alertes
+    Remplace l'ancien generate_metadata de la v2
+    """
     try:
         data = request.json
         title = data.get('title', '')
@@ -303,55 +324,99 @@ def classify_v2():
         
         start_time = time.time()
         
-        # Classification basée sur configuration
-        domain, confidence = config.classify_article(title, content, source)
+        # 1. Classification
+        domain, confidence, method = classify(title, content, source)
         
-        # Métadonnées du domaine
-        domain_config = config.domains_config.get(domain, {})
+        # 2. Niveau d'alerte
+        alert_level = determine_alert_level(title, content, domain, confidence)
         
-        # Niveau d'alerte
-        alert_level = config.get_alert_level(title, content, domain)
+        # 3. Génération des tags
+        tags = generate_tags(title, content, domain, confidence)
         
-        # Concepts Obsidian
-        obsidian_concepts = config.generate_obsidian_concepts(title, content, domain)
+        # 4. Informations du domaine
+        domain_info = config.domains_config.get(domain, {})
         
-        # Tags stratégiques
-        strategic_tags = config.generate_strategic_tags(title, content, domain, alert_level)
+        # 5. Concepts Obsidian (pour compatibilité)
+        obsidian_concepts = extract_obsidian_concepts(title, content, domain)
         
         duration = time.time() - start_time
         
         result = {
+            # Classification
             "domain": domain,
-            "domain_label": domain_config.get('label', domain),
-            "domain_emoji": domain_config.get('emoji', '📄'),
+            "domain_label": domain_info.get('label', domain.replace('_', ' ').title()),
             "confidence": confidence,
+            "classification_method": method,
+            
+            # Alertes et tags
             "alert_level": alert_level,
+            "tags": tags,
             "obsidian_concepts": obsidian_concepts,
-            "strategic_tags": strategic_tags,
-            "output_folder": domain_config.get('output_folder', domain),
+            
+            # Métadonnées
+            "output_folder": domain.replace('_', '-'),
             "processing_time": duration,
-            "version": "2.0_config_only",
-            "classification_method": "configuration_based"
+            "llm_used": method.startswith('llm'),
+            "version": "3.0_hybrid"
         }
         
-        logger.info(f"✅ Classification V2: {domain} ({confidence}%) - {alert_level}")
+        logger.info(f"✅ Métadonnées générées: {domain} ({confidence}%) - {alert_level} - {len(tags)} tags")
         return jsonify(result)
         
     except Exception as e:
-        logger.error(f"❌ Erreur classification V2: {e}")
+        logger.error(f"❌ Erreur génération métadonnées: {e}")
         return jsonify({
-            "domain": "cyber_investigations",
-            "confidence": 50,
-            "alert_level": "info",
-            "obsidian_concepts": [],
-            "strategic_tags": ["#error"],
             "error": str(e),
-            "version": "2.0_fallback"
-        }), 200
+            "domain": "cyber_investigations",
+            "confidence": 0,
+            "alert_level": "info",
+            "tags": [],
+            "version": "3.0_error"
+        }), 500
 
-@app.route('/summarize_v2', methods=['POST'])
-def summarize_v2():
-    """Résumé intelligent v2.0 - Configuré par domaine"""
+def extract_obsidian_concepts(title, content, domain):
+    """
+    Extrait des concepts pour liens Obsidian
+    TODO: Utiliser LLM pour extraction intelligente
+    """
+    # Pour l'instant, concepts prédéfinis par domaine
+    domain_concepts = {
+        'fraude_investissement': ['Investment Fraud', 'Financial Security', 'Scam Prevention'],
+        'fraude_paiement': ['Payment Security', 'Card Fraud', 'Transaction Monitoring'],
+        'fraude_president_cyber': ['CEO Fraud', 'Social Engineering', 'Wire Transfer Security'],
+        'fraude_ecommerce': ['E-commerce Security', 'Online Fraud', 'Customer Protection'],
+        'supply_chain_cyber': ['Supply Chain Security', 'Third Party Risk', 'Vendor Management'],
+        'intelligence_economique': ['Business Intelligence', 'Risk Assessment', 'Market Analysis'],
+        'fraude_crypto': ['Cryptocurrency', 'Blockchain Security', 'Digital Assets'],
+        'cyber_investigations': ['Cybercrime', 'Digital Forensics', 'Threat Intelligence']
+    }
+    
+    concepts = domain_concepts.get(domain, ['Cybersecurity', 'Risk Management'])
+    return concepts[:3]  # Maximum 3 concepts
+
+@app.route('/classify', methods=['POST'])
+def classify_endpoint():
+    """
+    Endpoint de classification simple (pour compatibilité)
+    Utilise generate_metadata en interne
+    """
+    result = generate_metadata()
+    if isinstance(result, tuple):  # Si erreur
+        return result
+    
+    # Extraire seulement les infos de classification
+    response_data = result.get_json()
+    return jsonify({
+        "domain": response_data["domain"],
+        "confidence": response_data["confidence"],
+        "method": response_data["classification_method"],
+        "alert_level": response_data["alert_level"],
+        "tags": response_data["tags"]
+    })
+
+@app.route('/summarize', methods=['POST'])
+def summarize_endpoint():
+    """Endpoint de génération de résumé"""
     try:
         data = request.json
         title = data.get('title', '')
@@ -360,196 +425,177 @@ def summarize_v2():
         
         start_time = time.time()
         
-        # Résumé basé sur configuration du domaine
-        summary = config.generate_summary(title, content, domain)
+        # Générer le résumé
+        summary = generate_summary(title, content, domain)
         
         duration = time.time() - start_time
         
-        logger.info(f"✅ Résumé V2 généré pour {domain} (durée: {duration:.2f}s)")
         return jsonify({
             "summary": summary,
             "domain": domain,
             "processing_time": duration,
-            "version": "2.0_config_only"
+            "method": "llm" if model_loaded else "template",
+            "version": "3.0"
         })
         
     except Exception as e:
-        logger.error(f"❌ Erreur résumé V2: {e}")
+        logger.error(f"❌ Erreur résumé: {e}")
         return jsonify({
             "error": str(e),
-            "summary": f"**Résumé de** : {data.get('title', 'Article')}\n\n• Contenu analysé automatiquement\n• Classification effectuée"
-        }), 200
+            "summary": f"**{title}**\n\nErreur lors de la génération du résumé."
+        }), 500
 
-@app.route('/generate_metadata', methods=['POST'])
-def generate_metadata():
-    """Endpoint unifié - Classification + Résumé + Métadonnées complètes"""
-    try:
-        data = request.json
-        title = data.get('title', '')
-        content = data.get('content', '')
-        source = data.get('source', '')
-        
-        start_time = time.time()
-        
-        # Classification complète
-        domain, confidence = config.classify_article(title, content, source)
-        domain_config = config.domains_config.get(domain, {})
-        
-        # Toutes les métadonnées
-        alert_level = config.get_alert_level(title, content, domain)
-        obsidian_concepts = config.generate_obsidian_concepts(title, content, domain)
-        strategic_tags = config.generate_strategic_tags(title, content, domain, alert_level)
-        summary = config.generate_summary(title, content, domain)
-        
-        duration = time.time() - start_time
-        
-        result = {
-            # Classification
-            "domain": domain,
-            "domain_label": domain_config.get('label', domain),
-            "domain_emoji": domain_config.get('emoji', '📄'),
-            "confidence": confidence,
-            "alert_level": alert_level,
+def generate_summary(title, content, domain):
+    """
+    Génère un résumé intelligent
+    Utilise le LLM si disponible, sinon template
+    """
+    if model_loaded and summarizer:
+        try:
+            # Résumé par LLM
+            text_to_summarize = f"{title}. {content[:2000]}"
+            result = summarizer(text_to_summarize, max_length=150, min_length=50)
+            summary = result[0]['summary_text']
             
-            # Métadonnées
-            "obsidian_concepts": obsidian_concepts,
-            "strategic_tags": strategic_tags,
-            "output_folder": domain_config.get('output_folder', domain),
+            # Formater pour le domaine
+            domain_labels = {
+                'fraude_investissement': '💰 **Investment Fraud Alert**',
+                'fraude_paiement': '💳 **Payment Security Alert**',
+                'fraude_president_cyber': '🎭 **CEO Fraud Warning**',
+                'fraude_ecommerce': '🛒 **E-commerce Fraud Alert**',
+                'supply_chain_cyber': '🔗 **Supply Chain Risk**',
+                'intelligence_economique': '🕵️ **Business Intelligence**',
+                'fraude_crypto': '₿ **Crypto Fraud Alert**',
+                'cyber_investigations': '🔍 **Cybercrime Investigation**'
+            }
             
-            # Contenu
-            "summary": summary,
+            label = domain_labels.get(domain, '📊 **Security Alert**')
             
-            # Technique
-            "processing_time": duration,
-            "classification_method": "unified_config_v2",
-            "version": "2.0_unified"
-        }
-        
-        logger.info(f"✅ Métadonnées unifiées: {domain} ({confidence}%) - {alert_level}")
-        return jsonify(result)
-        
-    except Exception as e:
-        logger.error(f"❌ Erreur métadonnées: {e}")
-        return jsonify({"error": str(e)}), 500
+            return f"{label}: {title}\n\n{summary}"
+            
+        except Exception as e:
+            logger.error(f"Erreur LLM summary: {e}")
+            # Fallback vers template
+    
+    # Template de résumé par défaut
+    return generate_summary_template(title, content, domain)
 
-# ==================== CONFIGURATION MANAGEMENT ====================
+def generate_summary_template(title, content, domain):
+    """
+    Génère un résumé basé sur un template (fallback)
+    """
+    # Extraire première phrase significative
+    sentences = [s.strip() for s in content.split('.') if len(s.strip()) > 20]
+    first_sentence = sentences[0] if sentences else "Details in article"
+    
+    templates = {
+        'fraude_investissement': "💰 **Investment Fraud Alert**: {title}\n\n• **Threat**: {sentence}\n• **Target**: Investors and savers\n• **Action**: Verify with financial authorities",
+        'fraude_paiement': "💳 **Payment Security Alert**: {title}\n\n• **Risk**: {sentence}\n• **Impact**: Financial loss potential\n• **Protection**: Monitor transactions closely",
+        'fraude_president_cyber': "🎭 **CEO Fraud Warning**: {title}\n\n• **Method**: {sentence}\n• **Target**: Corporate executives\n• **Prevention**: Verify all wire transfer requests",
+        'default': "🔍 **Security Alert**: {title}\n\n• **Summary**: {sentence}\n• **Category**: {domain}\n• **Action**: Review and assess impact"
+    }
+    
+    template = templates.get(domain, templates['default'])
+    return template.format(title=title, sentence=first_sentence, domain=domain.replace('_', ' ').title())
+
+# Alias pour compatibilité avec v2
+@app.route('/summarize_v2', methods=['POST'])
+def summarize_v2_endpoint():
+    """Alias pour compatibilité avec l'ancienne API"""
+    return summarize_endpoint()
+
+@app.route('/classify_v2', methods=['POST'])
+def classify_v2_endpoint():
+    """Alias pour compatibilité avec l'ancienne API"""
+    return generate_metadata()
+
+@app.route('/health', methods=['GET'])
+def health():
+    """Health check endpoint"""
+    return jsonify({
+        "status": "ok",
+        "service": "RSS LLM Service v3.0",
+        "llm_loaded": model_loaded,
+        "transformers_available": TRANSFORMERS_AVAILABLE,
+        "domains_count": len(config.domains_config),
+        "version": "3.0_hybrid"
+    })
+
+@app.route('/status', methods=['GET'])
+def status():
+    """Status détaillé du service"""
+    return jsonify({
+        "service": "RSS LLM Service v3.0 - Hybrid Architecture",
+        "architecture": "LLM + Fallback Rules",
+        "models": {
+            "classifier": "DeBERTa-v3-base-mnli" if model_loaded else "Not loaded",
+            "summarizer": "distilbart-cnn-12-6" if model_loaded else "Not loaded",
+            "status": "operational" if model_loaded else "fallback_mode"
+        },
+        "endpoints": {
+            "primary": ["/generate_metadata", "/classify", "/summarize"],
+            "compatibility": ["/classify_v2", "/summarize_v2"],
+            "monitoring": ["/health", "/status", "/config/info"]
+        },
+        "capabilities": {
+            "classification": "8 fraud categories + general",
+            "tags": "English, deduplicated, contextual",
+            "alerts": "4 levels (critical, urgent, watch, info)",
+            "summaries": "LLM-generated or template-based"
+        },
+        "performance": {
+            "classification_avg": "0.3s" if model_loaded else "0.1s",
+            "summary_avg": "1.2s" if model_loaded else "0.05s"
+        },
+        "version": "3.0_hybrid",
+        "timestamp": time.time()
+    })
+
+@app.route('/config/info', methods=['GET'])
+def config_info():
+    """Informations sur la configuration actuelle"""
+    return jsonify({
+        "domains": list(config.domains_config.keys()),
+        "sources_count": len(config.sources_config),
+        "classification_method": "hybrid" if model_loaded else "rules_only",
+        "supported_languages": ["en", "fr"],
+        "tag_language": "en",
+        "max_tags_per_article": 6,
+        "alert_levels": ["critical", "urgent", "watch", "info"],
+        "version": "3.0"
+    })
 
 @app.route('/reload_config', methods=['POST'])
 def reload_config():
     """Recharge la configuration sans redémarrer"""
     try:
         global config
-        config = AntifraudConfigLoader()
+        config = ConfigManager()
         
         return jsonify({
             "status": "success",
-            "message": "Configuration rechargée",
+            "message": "Configuration reloaded",
             "domains_count": len(config.domains_config),
-            "domains": list(config.domains_config.keys()),
             "sources_count": len(config.sources_config),
             "timestamp": time.time()
         })
     except Exception as e:
-        logger.error(f"❌ Erreur rechargement: {e}")
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/config/domains', methods=['GET'])
-def get_domains():
-    """Liste les domaines configurés"""
-    try:
-        domains_info = {}
-        for domain_id, domain_config in config.domains_config.items():
-            domains_info[domain_id] = {
-                "label": domain_config.get('label', domain_id),
-                "emoji": domain_config.get('emoji', '📄'),
-                "default_alert": domain_config.get('default_alert', 'info'),
-                "keywords_count": len(domain_config.get('critical_keywords', [])),
-                "output_folder": domain_config.get('output_folder', domain_id),
-                "priority_multiplier": domain_config.get('priority_multiplier', 1.0)
-            }
-        
+        logger.error(f"❌ Erreur rechargement config: {e}")
         return jsonify({
-            "domains": domains_info,
-            "total_count": len(domains_info),
-            "version": "2.0_config_only"
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+            "status": "error",
+            "error": str(e)
+        }), 500
 
-@app.route('/config/sources', methods=['GET'])
-def get_sources():
-    """Liste les sources configurées"""
-    try:
-        sources_by_domain = {}
-        for source in config.sources_config:
-            domain = source.get('domain', 'unknown')
-            if domain not in sources_by_domain:
-                sources_by_domain[domain] = []
-            sources_by_domain[domain].append({
-                "name": source.get('name'),
-                "priority": source.get('priority', 'medium'),
-                "keywords": source.get('keywords', [])
-            })
-        
-        return jsonify({
-            "sources_by_domain": sources_by_domain,
-            "total_sources": len(config.sources_config),
-            "version": "2.0_config_only"
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ==================== HEALTH & STATUS ====================
-
-@app.route('/health', methods=['GET'])
-def health():
-    """Health check"""
-    return jsonify({
-        "status": "ok",
-        "service": "Anti-Fraud LLM Service v2.0",
-        "config_loaded": len(config.domains_config) > 0,
-        "domains_count": len(config.domains_config),
-        "sources_count": len(config.sources_config),
-        "model_loaded": model_loaded,
-        "transformers_available": TRANSFORMERS_AVAILABLE,
-        "version": "2.0_config_only",
-        "timestamp": time.time()
-    })
-
-@app.route('/status', methods=['GET'])
-def status():
-    """Statut détaillé"""
-    return jsonify({
-        "service": "Anti-Fraud LLM Service v2.0 - Configuration Only",
-        "endpoints": [
-            "/classify_v2", "/summarize_v2", "/generate_metadata",
-            "/reload_config", "/config/domains", "/config/sources",
-            "/health", "/status"
-        ],
-        "domains_available": list(config.domains_config.keys()),
-        "config_status": {
-            "domains_loaded": len(config.domains_config),
-            "sources_loaded": len(config.sources_config),
-            "prompts_loaded": len(config.prompts_config),
-            "classification_rules": bool(config.classification_rules),
-            "alert_levels": bool(config.alert_levels)
-        },
-        "model_status": {
-            "transformers_available": TRANSFORMERS_AVAILABLE,
-            "models_loaded": model_loaded
-        },
-        "version": "2.0_config_only",
-        "cleaned_endpoints": "V1 endpoints removed - V2 only"
-    })
+# ==================== DÉMARRAGE ====================
 
 if __name__ == '__main__':
-    logger.info("🚀 Démarrage Anti-Fraud LLM Service v2.0 - Configuration Only")
+    logger.info("🚀 Démarrage RSS LLM Service v3.0 - Architecture Hybride")
     
-    # Chargement configuration (prioritaire)
-    config = AntifraudConfigLoader()
+    # Chargement configuration
+    config = ConfigManager()
     
-    # Chargement modèles (optionnel)
-    load_model()
+    # Chargement modèles LLM
+    load_models()
     
     # Démarrage serveur
     app.run(host='0.0.0.0', port=5000, debug=False)

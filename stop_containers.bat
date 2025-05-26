@@ -24,7 +24,7 @@ set RESET=[0m
 
 echo %YELLOW%🛑 Arret conteneurs...%RESET%
 
-docker stop rss_llm_service rss_nodered
+docker stop rss_llm_service_v3 rss_nodered
 
 if %errorlevel% equ 0 (
     echo %GREEN%✅ Conteneurs arretes%RESET%

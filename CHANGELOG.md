@@ -15,6 +15,14 @@ et ce projet suit [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [3.0.0] - 2025-05-26
+
+### Une utilisation du LLM réelle ! 😜
+
+#### ✨ Nouvelles Fonctionnalités
+- **Classification intelligente v3.0** : Le hardcode en fullback, place au LLM pour le une classification dynamique
+- **Le résumé du résumé** : Le flux RSS c'est quand même souvent déjà des résumés, du coup, maintenant, nous n'avons plus qu'un troncage mais bien le résumé d'un résumé par un LLM ! 
+
 ## [2.0.0] - 2025-05-24
 
 ### 🎉 Version Majeure - Pipeline Complet

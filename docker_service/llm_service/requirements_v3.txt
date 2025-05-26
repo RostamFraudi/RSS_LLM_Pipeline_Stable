@@ -1,0 +1,27 @@
+# Requirements for RSS LLM Service v3.0
+# Versions spécifiques pour compatibilité et stabilité
+
+# Framework web
+flask==2.3.3
+flask-cors==4.0.0
+
+# Machine Learning - Transformers
+transformers==4.35.2
+torch==2.1.0
+sentencepiece==0.1.99
+protobuf==3.20.3
+
+# Optimisations
+accelerate==0.24.1
+optimum==1.13.2
+
+# Utilitaires
+numpy==1.24.3
+requests==2.31.0
+python-dateutil==2.8.2
+
+# Monitoring (optionnel)
+prometheus-client==0.18.0
+
+# Note: Pour une installation plus légère sans GPU :
+# pip install torch --index-url https://download .pytorch.org/whl/cpu

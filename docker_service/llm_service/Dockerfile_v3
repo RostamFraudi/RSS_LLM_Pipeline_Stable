@@ -1,0 +1,50 @@
+# Dockerfile v3 - RSS LLM Service avec vrais modèles
+FROM python:3.10-slim
+
+# Métadonnées
+LABEL maintainer="RSS LLM Pipeline Team"
+LABEL version="3.0"
+LABEL description="RSS LLM Service with real ML models"
+
+# Variables d'environnement
+ENV PYTHONUNBUFFERED=1
+ENV TRANSFORMERS_CACHE=/app/cache
+ENV TORCH_HOME=/app/cache
+ENV HF_HOME=/app/cache
+
+# Dépendances système
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Répertoire de travail
+WORKDIR /app
+
+# Copier les requirements
+COPY requirements_v3.txt .
+
+# Installer les dépendances Python
+RUN pip install --no-cache-dir -r requirements_v3.txt
+
+# Pré-télécharger les modèles (optionnel, pour build plus rapide au runtime)
+# RUN python -c "from transformers import pipeline; \
+#     pipeline('zero-shot-classification', model='MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli'); \
+#     pipeline('summarization', model='sshleifer/distilbart-cnn-12-6')"
+
+# Copier l'application
+COPY app.py .
+
+# Créer le dossier cache
+RUN mkdir -p /app/cache
+
+# Port
+EXPOSE 5000
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:5000/health || exit 1
+
+# Lancement
+CMD ["python", "app.py"]
