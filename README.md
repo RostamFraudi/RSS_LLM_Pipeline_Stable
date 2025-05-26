@@ -414,4 +414,8 @@ deployment\test_pipeline.bat
 
 **🎉 Votre Expert System Anti-Fraude + IA hybride est prêt !**
 
+<<<<<<< HEAD
 *Dernière mise à jour : 25/05/2025 • Version 2.0 Expert System + IA Hybride Optimisée*
+=======
+*Dernière mise à jour : 25/05/2025 • Version 2.0 Expert System + IA Hybride Optimisée*
+>>>>>>> 2b08e6c27430678111987964b97183e6ededec44
