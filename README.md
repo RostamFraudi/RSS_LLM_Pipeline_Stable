@@ -1,7 +1,7 @@
 # 🚀 RSS + LLM Pipeline - Version Portable
 
 > **Pipeline RSS automatisé** avec classification Expert System + IA hybride et intégration Obsidian  
-> ✅ **100% portable** • 🐳 **Docker** • 🧠 **Expert System** • 🤖 **IA optionnelle** • 📝 **Auto-résumés**
+> ✅ **100% portable** • 🐳 **Docker** • 🤖 **IA** • 🧠 **Expert System Fallback** • 📝 **Auto-résumés**
 
 ---
 
@@ -37,8 +37,8 @@ stop_containers.bat
 
 ### 📋 Prérequis
 - **Docker Desktop** (Windows/Mac/Linux)
-- **4+ Go RAM** disponible  
-- **2+ Go stockage** libre
+- **8+ Go RAM** disponible  
+- **10+ Go stockage** libre
 
 ### ⚡ Première Installation
 ```bash
@@ -75,10 +75,9 @@ stop_containers.bat     # 🌙 Soir (5s)
 ### 🧠 **Approche Technique**
 Ce pipeline utilise une **architecture hybride intelligente** qui privilégie fiabilité et performance :
 
-- **🎯 Classification principale** : Algorithme expert avec 250+ mots-clés spécialisés Anti-Fraude
-- **🤖 IA optionnelle** : Enrichissement contextuel et fallbacks intelligents
-- **📝 Résumés adaptatifs** : Templates par domaine + génération LLM si nécessaire
-- **⚡ Performance** : <0.5s par article, 85-95% précision, déterministe
+- **🎯 Classification principale** : classificateur zero-shot avec Fallback algorithme expert avec 250+ mots-clés spécialisés Anti-Fraude
+- **🤖 IA LMMs** : Enrichissement contextuel et fallbacks intelligents
+- **📝 Résumés adaptatifs** : Templates Obsidian avec génération LLM
 
 ### 📁 Structure du Projet
 ```
@@ -107,16 +106,16 @@ RSS_LLM_Pipeline_Stable/
 ### 🎯 **Pipeline de Classification**
 1. **📡 Lecture RSS** : Parser JavaScript manuel (200+ lignes)
 2. **🔍 Analyse Expert** : Score par domaine (mots-clés + source + priorité)
-3. **🎯 Classification** : Confidence 60-95%, fallback LLM si <70%
-4. **📝 Résumé** : Template spécialisé ou génération LLM
+3. **🎯 Classification** : Score confidence
+4. **📝 Résumé** :  Génération LLM ou Fallback template spécialisé en cas d'indisponibilité du LLM
 5. **💾 Obsidian** : Markdown enrichi avec métadonnées
 
 ### 🔗 Portabilité Garantie
-- ✅ **Algorithme déterministe** : Classification traçable et configurable
+- ✅ **Algorithme déterministe en Fallback** : Classification traçable et configurable
 - ✅ **Chemins relatifs** partout (`../config`, `%~dp0..`)
 - ✅ **Auto-création** dossiers manquants
 - ✅ **Performance optimisée** : 15s (quotidien) vs 2-5min (build)
-- ✅ **Aucune dépendance** externe (APIs, GPU, licences)
+- ✅ **Aucune dépendance** externe (APIs, GPU, licences) uniquement les flux rss
 
 ---
 
