@@ -1,111 +1,119 @@
 {
   "_metadata": {
-    "version": "2.1_realistic_domains",
-    "last_updated": "2025-05-25",
-    "description": "Configuration corrigée - Default domains basés sur expertise réelle des sources",
-    "classification_logic": "content_first_with_realistic_source_defaults"
+    "version": "3.2_extended_domains",
+    "last_updated": "2025-06-01",
+    "description": "Configuration étendue - Domaines généralistes + mots-clés bilingues FR/EN",
+    "classification_logic": "content_first_with_dynamic_llm_labels",
+    "new_features": [
+      "Mots-clés bilingues FR/EN renforcés",
+      "5 nouveaux domaines généralistes",
+      "Sources RSS spécialisées par domaine",
+      "Architecture extensible pour veille généraliste"
+    ],
+    "domains_count": 14,
+    "languages_supported": ["FR", "EN"]
   },
 
   "sources": [
     {
       "name": "AMF - Autorité des Marchés Financiers",
-      "url": "https://www.amf-france.org/fr/abonnements-flux-rss",
+      "url": "https://www.amf-france.org/fr/flux-rss/display/28",
       "default_domain": "fraude_investissement",
-      "source_expertise": ["fraude_investissement", "fraude_crypto"],
+      "source_expertise": ["fraude_investissement", "fraude_crypto", "fintech"],
       "expertise_weight": 3.0,
       "priority": "high",
-      "keywords": ["investissement", "arnaque", "escroquerie", "placement", "crypto", "FR"],
-      "_comment": "✅ CORRECT - AMF spécialisé protection épargne et prévention arnaques investissement"
+      "keywords": ["investissement", "arnaque", "escroquerie", "placement", "crypto", "fintech", "FR"],
+      "_comment": "✅ AMF étendu pour fintech"
     },
     {
       "name": "CERT-FR - Alertes Sécurité", 
       "url": "https://www.cert.ssi.gouv.fr/alerte/feed/",
       "default_domain": "cyber_investigations",
-      "source_expertise": ["cyber_investigations", "fraude_president_cyber"],
+      "source_expertise": ["cyber_investigations", "fraude_president_cyber", "osint_roso"],
       "expertise_weight": 2.0,
       "priority": "high",
       "keywords": ["vulnérabilité", "cyberattaque", "sécurité", "alerte", "technique", "FR"],
-      "_comment": "🔄 CORRIGÉ - CERT-FR = alertes techniques cyber, pas spécifiquement FOVI"
-    },
-    {
-      "name": "KrebsOnSecurity",
-      "url": "https://krebsonsecurity.com/feed",
-      "default_domain": "cyber_investigations",
-      "source_expertise": ["cyber_investigations", "fraude_paiement"],
-      "expertise_weight": 2.5,
-      "priority": "high",
-      "keywords": ["fraud", "cybercrime", "investigation", "breach", "scam", "EN"],
-      "_comment": "✅ CORRECT - Krebs = investigations cybercriminalité, peut couvrir payment fraud"
-    },
-    {
-      "name": "BankInfoSecurity",
-      "url": "https://www.bankinfosecurity.com/rss-feeds",
-      "default_domain": "fraude_paiement",
-      "source_expertise": ["fraude_paiement", "fraude_president_cyber"],
-      "expertise_weight": 2.5,
-      "priority": "high", 
-      "keywords": ["payment", "banking", "fraud", "financial", "security", "EN"],
-      "_comment": "✅ CORRECT - BankInfoSecurity spécialisé sécurité bancaire et moyens paiement"
+      "_comment": "✅ CERT-FR étendu pour OSINT"
     },
     {
       "name": "ZATAZ - Cybersécurité France",
       "url": "https://www.zataz.com/feed",
       "default_domain": "cyber_investigations",
-      "source_expertise": ["cyber_investigations", "fraude_paiement", "fraude_ecommerce"],
+      "source_expertise": ["cyber_investigations", "fraude_paiement", "fraude_ecommerce", "osint_roso"],
       "expertise_weight": 1.5,
       "priority": "high",
       "keywords": ["cybersécurité", "piratage", "fraude", "enquête", "data", "FR"],
-      "_comment": "✅ CORRECT - ZATAZ généraliste cybersécurité française, investigations variées"
-    },
-    {
-      "name": "CoinDesk - Crypto News",
-      "url": "https://www.coindesk.com/rss",
-      "default_domain": "actualite_crypto",
-      "source_expertise": ["actualite_crypto", "fraude_crypto"],
-      "expertise_weight": 1.0,
-      "priority": "medium",
-      "keywords": ["crypto", "blockchain", "bitcoin", "ethereum", "news", "EN"],
-      "_comment": "🔄 CORRIGÉ - CoinDesk = actualités crypto générales, pas spécifiquement fraude"
-    },
-    {
-      "name": "CSO Online", 
-      "url": "https://www.csoonline.com/feed",
-      "default_domain": "cyber_investigations",
-      "source_expertise": ["cyber_investigations", "fraude_president_cyber", "supply_chain_cyber"],
-      "expertise_weight": 1.0,
-      "priority": "medium",
-      "keywords": ["security", "enterprise", "cyber", "threat", "risk", "EN"],
-      "_comment": "🔄 CORRIGÉ - CSO = sécurité enterprise générale, pas spécifiquement FOVI"
-    },
-    {
-      "name": "Merchant Fraud Journal",
-      "url": "https://www.merchantfraudjournal.com/feed",
-      "default_domain": "fraude_ecommerce",
-      "source_expertise": ["fraude_ecommerce", "fraude_paiement"],
-      "expertise_weight": 2.5,
-      "priority": "medium",
-      "keywords": ["ecommerce", "payment", "chargeback", "merchant", "retail", "EN"],
-      "_comment": "✅ CORRECT - Merchant Fraud Journal spécialisé fraude e-commerce"
-    },
-    {
-      "name": "Threatpost",
-      "url": "https://threatpost.com/feed", 
-      "default_domain": "cyber_investigations",
-      "source_expertise": ["cyber_investigations", "supply_chain_cyber"],
-      "expertise_weight": 1.0,
-      "priority": "medium",
-      "keywords": ["threat", "vulnerability", "malware", "attack", "breach", "EN"],
-      "_comment": "🔄 CORRIGÉ - Threatpost = menaces cyber générales, pas spécifiquement supply chain"
+      "_comment": "✅ ZATAZ étendu pour OSINT"
     },
     {
       "name": "ANSSI - Agence Cybersécurité",
-      "url": "https://www.ssi.gouv.fr/flux-rss/",
+      "url": "https://cyber.gouv.fr/actualites/feed",
       "default_domain": "intelligence_economique",
-      "source_expertise": ["intelligence_economique", "cyber_investigations"],
+      "source_expertise": ["intelligence_economique", "cyber_investigations", "supply_chain_general"],
       "expertise_weight": 2.0,
       "priority": "medium",
       "keywords": ["cybersécurité", "stratégie", "défense", "économique", "souveraineté", "FR"],
-      "_comment": "✅ CORRECT - ANSSI = vision stratégique cybersécurité, intelligence économique"
+      "_comment": "✅ ANSSI étendu pour supply chain"
+    },
+    {
+      "name": "Google News - Fraude (FR)",
+      "url": "https://news.google.com/rss/search?q=fraude+escroquerie+arnaque&hl=fr&gl=fr&ceid=FR:fr",
+      "default_domain": "cyber_investigations",
+      "source_expertise": ["fraude_investissement", "fraude_paiement", "fraude_president_cyber", "fraude_ecommerce", "fraude_crypto", "cyber_investigations"],
+      "expertise_weight": 1.0,
+      "priority": "high",
+      "keywords": ["fraude", "escroquerie", "arnaque", "cybercriminalité", "piratage", "FR"],
+      "_comment": "✅ Google News FR - Articles fraude"
+    },
+    {
+      "name": "Google News - Innovation Tech (FR)",
+      "url": "https://news.google.com/rss/search?q=innovation+technologie+startup+IA&hl=fr&gl=fr&ceid=FR:fr",
+      "default_domain": "innovation_tech",
+      "source_expertise": ["innovation_tech", "fintech", "actualite_crypto"],
+      "expertise_weight": 1.0,
+      "priority": "medium",
+      "keywords": ["innovation", "technologie", "startup", "IA", "intelligence artificielle", "FR"],
+      "_comment": "🆕 Google News FR - Innovation tech"
+    },
+    {
+      "name": "TechCrunch",
+      "url": "https://techcrunch.com/feed/",
+      "default_domain": "innovation_tech",
+      "source_expertise": ["innovation_tech", "fintech", "actualite_crypto"],
+      "expertise_weight": 2.0,
+      "priority": "high",
+      "keywords": ["startup", "funding", "innovation", "technology", "venture", "EN"],
+      "_comment": "🆕 TechCrunch - Innovation tech internationale"
+    },
+    {
+      "name": "FinTech Magazine",
+      "url": "https://www.fintechmagazine.com/rss",
+      "default_domain": "fintech",
+      "source_expertise": ["fintech", "fraude_paiement", "actualite_crypto"],
+      "expertise_weight": 2.5,
+      "priority": "medium",
+      "keywords": ["fintech", "banking", "payment", "financial", "digital", "EN"],
+      "_comment": "🆕 FinTech spécialisé"
+    },
+    {
+      "name": "Supply Chain Dive",
+      "url": "https://www.supplychaindive.com/feeds/news/",
+      "default_domain": "supply_chain_general",
+      "source_expertise": ["supply_chain_general", "supply_chain_cyber", "intelligence_economique"],
+      "expertise_weight": 2.0,
+      "priority": "medium",
+      "keywords": ["supply", "chain", "logistics", "procurement", "vendor", "EN"],
+      "_comment": "🆕 Supply Chain spécialisé"
+    },
+    {
+      "name": "OSINT Combine",
+      "url": "https://www.osintcombine.com/rss",
+      "default_domain": "osint_roso",
+      "source_expertise": ["osint_roso", "cyber_investigations", "intelligence_economique"],
+      "expertise_weight": 2.5,
+      "priority": "medium",
+      "keywords": ["osint", "intelligence", "investigation", "analysis", "research", "EN"],
+      "_comment": "🆕 OSINT spécialisé"
     }
   ],
   
@@ -113,15 +121,17 @@
     "fraude_investissement": {
       "label": "Fraude aux Investissements",
       "emoji": "💰",
+      "llm_label": "investment fraud and financial scams",
       "default_alert": "watch",
       "critical_keywords": [
         "arnaque", "escroquerie", "ponzi", "pyramide", "investissement", 
         "placement", "AMF", "alerte", "trading", "forex", "option", 
-        "binaire", "signal", "conseil", "rendement", "scam", "scheme"
+        "binaire", "signal", "conseil", "rendement", "scam", "scheme",
+        "fraud", "investment", "financial", "broker", "portfolio"
       ],
       "alert_keywords": [
         "risque", "attention", "vigilance", "mise en garde", "suspicion",
-        "warning", "risk", "caution"
+        "warning", "risk", "caution", "alert", "danger"
       ],
       "output_folder": "fraude_investissement",
       "obsidian_concepts": [
@@ -133,16 +143,18 @@
     "fraude_paiement": {
       "label": "Fraude aux Moyens de Paiement",
       "emoji": "💳",
+      "llm_label": "payment fraud and financial transactions security",
       "default_alert": "urgent",
       "critical_keywords": [
         "carte", "paiement", "skimming", "phishing", "banking", "payment", 
         "fraud", "card", "atm", "pos", "contactless", "virement", 
         "prélèvement", "chèque", "falsification", "clonage", "credit card",
-        "debit", "transaction", "terminal", "breach", "banking"
+        "debit", "transaction", "terminal", "breach", "banking",
+        "hameçonnage", "usurpation", "identité", "bancaire", "compte"
       ],
       "alert_keywords": [
         "tentative", "détection", "blocage", "suspicion", "anomalie",
-        "attempt", "detection", "blocked", "suspicious"
+        "attempt", "detection", "blocked", "suspicious", "unusual"
       ],
       "output_folder": "fraude_paiement",
       "obsidian_concepts": [
@@ -154,16 +166,18 @@
     "fraude_president_cyber": {
       "label": "Fraude au Président & FOVI",
       "emoji": "🎭",
+      "llm_label": "CEO fraud and business email compromise",
       "default_alert": "urgent",
       "critical_keywords": [
         "fovi", "président", "virement", "faux", "ordre", "usurpation", 
         "wire", "transfer", "ceo", "directeur", "dirigeant", "autorité",
         "email", "spoofing", "social", "engineering", "manipulation",
-        "executive", "business", "email", "compromise", "bec"
+        "executive", "business", "email", "compromise", "bec",
+        "ingénierie", "sociale", "chef", "entreprise", "directeur"
       ],
       "alert_keywords": [
         "tentative", "demande", "instruction", "procédure", "urgence",
-        "attempt", "request", "urgent", "executive"
+        "attempt", "request", "urgent", "executive", "emergency"
       ],
       "output_folder": "fraude_president",
       "obsidian_concepts": [
@@ -175,16 +189,18 @@
     "fraude_ecommerce": {
       "label": "Fraude E-commerce",
       "emoji": "🛒",
+      "llm_label": "e-commerce fraud and online retail security",
       "default_alert": "watch",
       "critical_keywords": [
         "ecommerce", "boutique", "chargeback", "merchant", "retail", 
         "online", "shopping", "marketplace", "vendeur", "acheteur",
         "livraison", "retour", "remboursement", "compte", "fake",
-        "amazon", "ebay", "shop", "store", "customer"
+        "amazon", "ebay", "shop", "store", "customer",
+        "commerce", "électronique", "plateforme", "marchand", "client"
       ],
       "alert_keywords": [
         "dispute", "litige", "réclamation", "plainte", "signalement",
-        "complaint", "dispute", "refund"
+        "complaint", "dispute", "refund", "chargeback"
       ],
       "output_folder": "fraude_ecommerce",
       "obsidian_concepts": [
@@ -194,108 +210,212 @@
       "priority_multiplier": 1.2
     },
     "supply_chain_cyber": {
-      "label": "Fraude Supply Chain",
+      "label": "Cyberattaques Supply Chain",
       "emoji": "🔗",
+      "llm_label": "supply chain cyber attacks and vendor security risks",
+      "default_alert": "urgent",
+      "critical_keywords": [
+        "supply", "chain", "cyber", "attack", "vendor", "third-party", 
+        "security", "breach", "compromise", "infiltration",
+        "chaîne", "approvisionnement", "cyberattaque", "fournisseur",
+        "sécurité", "intrusion", "compromission", "tiers"
+      ],
+      "alert_keywords": [
+        "vulnerability", "risk", "threat", "incident", "breach",
+        "vulnérabilité", "risque", "menace", "incident"
+      ],
+      "output_folder": "supply_chain_cyber",
+      "obsidian_concepts": [
+        "Supply Chain Security", "Cyberattaques", "Sécurité Fournisseurs", 
+        "Tiers de Confiance", "Cyber Resilience"
+      ],
+      "priority_multiplier": 1.8
+    },
+    "supply_chain_general": {
+      "label": "Supply Chain & Logistique",
+      "emoji": "📦",
+      "llm_label": "supply chain management and logistics operations",
       "default_alert": "info",
       "critical_keywords": [
         "supply", "chain", "logistique", "fournisseur", "approvisionnement", 
-        "vendor", "third-party", "partenaire", "sous-traitant", "livraison",
-        "transport", "entrepôt", "stock", "commande", "facture",
-        "supplier", "logistics", "procurement"
+        "vendor", "procurement", "logistics", "transport", "entrepôt",
+        "stock", "commande", "livraison", "distribution",
+        "chaîne", "logistique", "achats", "sourcing", "inventaire"
       ],
       "alert_keywords": [
-        "rupture", "retard", "problème", "défaillance", "risque",
-        "disruption", "delay", "issue", "risk"
+        "rupture", "retard", "problème", "défaillance", "pénurie",
+        "disruption", "delay", "shortage", "bottleneck"
       ],
-      "output_folder": "fraude_supply_chain",
+      "output_folder": "supply_chain_general",
       "obsidian_concepts": [
-        "Supply Chain", "Logistique", "Sécurité Fournisseurs", 
-        "Gestion Risques", "Tiers de Confiance"
+        "Supply Chain", "Logistique", "Procurement", 
+        "Gestion Stocks", "Distribution", "Transport"
       ],
       "priority_multiplier": 1.0
     },
     "intelligence_economique": {
-      "label": "Intelligence Économique & Risques",
+      "label": "Intelligence Économique & Stratégique",
       "emoji": "🕵️",
+      "llm_label": "economic intelligence and strategic business analysis",
       "default_alert": "info",
       "critical_keywords": [
         "intelligence", "économique", "espionnage", "stratégie", 
-        "concurrentiel", "veille", "risk", "géopolitique", "sanctions",
-        "réglementation", "compliance", "gouvernance", "audit", "contrôle",
-        "economic", "strategic", "competitive", "regulation"
+        "concurrentiel", "veille", "géopolitique", "sanctions",
+        "réglementation", "compliance", "gouvernance", "audit",
+        "economic", "strategic", "competitive", "intelligence",
+        "analysis", "market", "research", "business", "insight"
       ],
       "alert_keywords": [
-        "évolution", "changement", "impact", "conséquence", "adaptation",
-        "evolution", "change", "impact", "consequence"
+        "évolution", "changement", "impact", "conséquence", "tendance",
+        "evolution", "change", "impact", "trend", "shift"
       ],
       "output_folder": "intelligence_economique",
       "obsidian_concepts": [
         "Intelligence Économique", "Veille Stratégique", "Géopolitique", 
-        "Conformité Réglementaire", "Gestion des Risques"
+        "Analyse Concurrentielle", "Business Intelligence"
       ],
       "priority_multiplier": 0.8
     },
     "fraude_crypto": {
       "label": "Fraude Cryptomonnaies",
-      "emoji": "₿", 
+      "emoji": "₿",
+      "llm_label": "cryptocurrency fraud and blockchain security incidents",
       "default_alert": "watch",
       "critical_keywords": [
         "crypto", "blockchain", "bitcoin", "ethereum", "defi", "wallet", 
         "exchange", "scam", "rugpull", "token", "nft", "mining",
         "staking", "yield", "farming", "smart", "contract", "dao",
-        "cryptocurrency", "digital", "asset", "fraud"
+        "cryptocurrency", "digital", "asset", "fraud",
+        "cryptomonnaie", "arnaque", "escroquerie", "portefeuille",
+        "plateforme", "échange", "jeton", "minage", "exploitation"
       ],
       "alert_keywords": [
         "volatilité", "crash", "pump", "dump", "manipulation", "risque",
-        "volatility", "manipulation", "risk", "suspicious"
+        "volatility", "manipulation", "risk", "suspicious", "hack"
       ],
       "output_folder": "fraude_crypto",
       "obsidian_concepts": [
         "Cryptomonnaies", "Blockchain", "DeFi", "Sécurité Crypto", 
-        "Régulation Crypto", "Marchés Digitaux"
+        "Fraude Crypto", "Régulation Crypto"
       ],
       "priority_multiplier": 1.3
     },
     "actualite_crypto": {
       "label": "Actualité Cryptomonnaies",
       "emoji": "📈",
+      "llm_label": "cryptocurrency news and blockchain market developments",
       "default_alert": "info",
       "critical_keywords": [
         "crypto", "blockchain", "bitcoin", "ethereum", "price", "market",
         "trading", "news", "launch", "partnership", "adoption",
-        "regulation", "policy", "investment", "institutional"
+        "regulation", "policy", "investment", "institutional",
+        "cryptomonnaie", "marché", "cours", "prix", "nouvelle",
+        "lancement", "partenariat", "investissement", "institutionnel"
       ],
       "alert_keywords": [
-        "announcement", "update", "development", "trend", "analysis"
+        "announcement", "update", "development", "trend", "analysis",
+        "annonce", "mise à jour", "développement", "tendance", "analyse"
       ],
       "output_folder": "actualite_crypto",
       "obsidian_concepts": [
-        "Marchés Crypto", "Actualité Blockchain", "Adoption Institutionnelle",
+        "Marchés Crypto", "Actualité Blockchain", "Adoption Crypto", 
         "Régulation Crypto", "Innovation Blockchain"
       ],
-      "priority_multiplier": 0.8,
-      "_comment": "🆕 NOUVEAU domaine pour news crypto générales (non-fraude)"
+      "priority_multiplier": 0.8
     },
     "cyber_investigations": {
       "label": "Investigations Cybercriminalité",
       "emoji": "🔍",
+      "llm_label": "cybercrime investigation and digital forensics",
       "default_alert": "info",
       "critical_keywords": [
         "cybercrime", "investigation", "enquête", "piratage", "hacker", 
         "breach", "incident", "forensic", "malware", "ransomware",
-        "botnet", "darkweb", "leak", "data", "vol", "violation",
-        "cybersecurity", "threat", "attack", "vulnerability"
+        "botnet", "darkweb", "leak", "data", "violation",
+        "cybersecurity", "threat", "attack", "vulnerability",
+        "cybercriminalité", "cyberattaque", "rançongiciel",
+        "logiciel", "malveillant", "intrusion", "violation", "données"
       ],
       "alert_keywords": [
         "découverte", "analyse", "attribution", "preuves", "traces",
-        "discovery", "analysis", "evidence", "traces"
+        "discovery", "analysis", "evidence", "traces", "investigation"
       ],
       "output_folder": "cyber_investigations",
       "obsidian_concepts": [
         "Cybercriminalité", "Investigation Numérique", "Forensic", 
-        "Threat Intelligence", "Cyber Threat Hunting"
+        "Threat Intelligence", "Cybersécurité"
       ],
       "priority_multiplier": 1.1
+    },
+    "innovation_tech": {
+      "label": "Innovation Technologique",
+      "emoji": "🚀",
+      "llm_label": "technology innovation and emerging tech developments",
+      "default_alert": "info",
+      "critical_keywords": [
+        "innovation", "technologie", "startup", "breakthrough", "research",
+        "development", "emerging", "disruptive", "artificial", "intelligence",
+        "machine", "learning", "quantum", "robotics", "automation",
+        "innovation", "technologique", "recherche", "développement",
+        "intelligence", "artificielle", "apprentissage", "automatique",
+        "robotique", "automatisation", "percée", "révolutionnaire"
+      ],
+      "alert_keywords": [
+        "launch", "announcement", "funding", "breakthrough", "discovery",
+        "lancement", "annonce", "financement", "percée", "découverte"
+      ],
+      "output_folder": "innovation_tech",
+      "obsidian_concepts": [
+        "Innovation Technologique", "Recherche & Développement", "Startups", 
+        "Intelligence Artificielle", "Technologies Émergentes"
+      ],
+      "priority_multiplier": 1.0
+    },
+    "fintech": {
+      "label": "Technologies Financières",
+      "emoji": "💡",
+      "llm_label": "financial technology and digital banking innovations",
+      "default_alert": "info",
+      "critical_keywords": [
+        "fintech", "banking", "payment", "digital", "financial", "services",
+        "mobile", "app", "wallet", "lending", "credit", "insurance",
+        "regtech", "compliance", "neobank", "challenger", "bank",
+        "technologie", "financière", "banque", "numérique", "paiement",
+        "services", "financiers", "crédit", "assurance", "néobanque"
+      ],
+      "alert_keywords": [
+        "regulation", "partnership", "funding", "launch", "acquisition",
+        "réglementation", "partenariat", "financement", "lancement", "acquisition"
+      ],
+      "output_folder": "fintech",
+      "obsidian_concepts": [
+        "FinTech", "Banque Numérique", "Services Financiers", 
+        "Innovation Financière", "RegTech"
+      ],
+      "priority_multiplier": 1.1
+    },
+    "osint_roso": {
+      "label": "OSINT & Renseignement Sources Ouvertes",
+      "emoji": "🔎",
+      "llm_label": "open source intelligence and information gathering",
+      "default_alert": "info",
+      "critical_keywords": [
+        "osint", "intelligence", "renseignement", "sources", "ouvertes",
+        "investigation", "research", "analysis", "monitoring", "surveillance",
+        "social", "media", "geoint", "humint", "sigint", "cyber",
+        "threat", "hunting", "reconnaissance", "information", "gathering",
+        "veille", "surveillance", "analyse", "recherche", "médias", "sociaux"
+      ],
+      "alert_keywords": [
+        "technique", "methodology", "tool", "platform", "discovery",
+        "technique", "méthodologie", "outil", "plateforme", "découverte"
+      ],
+      "output_folder": "osint_roso",
+      "obsidian_concepts": [
+        "OSINT", "Renseignement", "Intelligence", "Veille", 
+        "Investigation", "Sources Ouvertes"
+      ],
+      "priority_multiplier": 1.2
     }
   },
 
@@ -303,17 +423,19 @@
     "content_weight": 0.8,
     "source_weight": 0.2,
     "description": "Le contenu prime sur la source pour la classification",
+    "llm_dynamic_generation": true,
+    "fallback_if_llm_unavailable": true,
+    "multilingual_support": true,
     "source_bonus_rules": {
-      "amf": {"fraude_investissement": 3, "fraude_crypto": 1},
-      "cert-fr": {"cyber_investigations": 2, "fraude_president_cyber": 1},
-      "krebs": {"cyber_investigations": 2, "fraude_paiement": 1},
-      "bankinfosecurity": {"fraude_paiement": 3, "fraude_president_cyber": 1},
-      "zataz": {"cyber_investigations": 2, "fraude_paiement": 1, "fraude_ecommerce": 1},
-      "coindesk": {"actualite_crypto": 2, "fraude_crypto": 1},
-      "merchant": {"fraude_ecommerce": 3, "fraude_paiement": 1},
-      "threatpost": {"cyber_investigations": 2, "supply_chain_cyber": 1},
-      "cso": {"cyber_investigations": 1, "fraude_president_cyber": 1},
-      "anssi": {"intelligence_economique": 3, "cyber_investigations": 1}
+      "amf": {"fraude_investissement": 3, "fraude_crypto": 1, "fintech": 1},
+      "cert-fr": {"cyber_investigations": 2, "fraude_president_cyber": 1, "osint_roso": 1},
+      "zataz": {"cyber_investigations": 2, "fraude_paiement": 1, "fraude_ecommerce": 1, "osint_roso": 1},
+      "anssi": {"intelligence_economique": 3, "cyber_investigations": 1, "supply_chain_general": 1},
+      "techcrunch": {"innovation_tech": 3, "fintech": 2, "actualite_crypto": 1},
+      "fintech": {"fintech": 3, "fraude_paiement": 1, "actualite_crypto": 1},
+      "supply": {"supply_chain_general": 3, "supply_chain_cyber": 2, "intelligence_economique": 1},
+      "osint": {"osint_roso": 3, "cyber_investigations": 2, "intelligence_economique": 1},
+      "google": {"cyber_investigations": 1, "innovation_tech": 1}
     }
   },
 
@@ -321,10 +443,15 @@
     "content_analysis_priority": true,
     "min_content_score": 2,
     "source_bonus_max": 3,
+    "llm_confidence_threshold": 70,
+    "fallback_confidence_threshold": 50,
+    "multilingual_keywords": true,
     "confidence_boost": {
       "content_keywords_found": 15,
       "source_expertise_match": 10,
-      "multiple_keywords": 5
+      "multiple_keywords": 5,
+      "llm_high_confidence": 20,
+      "multilingual_match": 5
     },
     "confidence_thresholds": {
       "high": 80,
@@ -361,18 +488,33 @@
     }
   },
 
-  "processing": {
-    "interval_minutes": 30,
-    "max_articles_per_run": 100,
-    "enable_smart_classification": true,
-    "enable_content_analysis": true,
-    "enable_source_bonus": true,
-    "enable_obsidian_links": true,
-    "language_detection": true,
-    "content_max_length": 2000,
-    "summary_max_length": 500,
-    "retry_attempts": 3,
-    "timeout_seconds": 30,
-    "_comment": "Configuration réaliste - contenu prime, sources comme bonus"
+  "domain_categories": {
+    "security_fraud": {
+      "description": "Domaines liés à la sécurité et la fraude",
+      "domains": ["fraude_investissement", "fraude_paiement", "fraude_president_cyber", "fraude_ecommerce", "fraude_crypto", "cyber_investigations", "supply_chain_cyber"]
+    },
+    "business_intelligence": {
+      "description": "Domaines de veille économique et stratégique", 
+      "domains": ["intelligence_economique", "supply_chain_general", "osint_roso"]
+    },
+    "technology_innovation": {
+      "description": "Domaines d'innovation et technologie",
+      "domains": ["innovation_tech", "fintech", "actualite_crypto"]
+    }
+  },
+
+  "extensibility": {
+    "description": "Guide pour ajouter de nouveaux domaines",
+    "new_domain_template": {
+      "label": "Nom Humain du Domaine",
+      "emoji": "🔥",
+      "llm_label": "english description for LLM zero-shot classification",
+      "default_alert": "info|watch|urgent|critical",
+      "critical_keywords": ["mot1_fr", "mot2_fr", "word1_en", "word2_en"],
+      "alert_keywords": ["alerte1_fr", "alert1_en"],
+      "output_folder": "nom_domaine_underscore",
+      "obsidian_concepts": ["Concept1", "Concept2", "Concept3"],
+      "priority_multiplier": 1.0
+    }
   }
 }

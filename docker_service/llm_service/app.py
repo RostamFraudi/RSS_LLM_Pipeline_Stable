@@ -34,8 +34,11 @@ class ConfigManager:
         self.domains_config = {}
         self.sources_config = []
         self.prompts_config = {}
+        self._llm_config_cache = None
         self.load_configuration()
     
+    
+
     def load_configuration(self):
         """Charge la configuration depuis les fichiers JSON"""
         try:
@@ -69,6 +72,57 @@ class ConfigManager:
                 'keywords': ['cyber', 'security', 'breach', 'hack']
             }
         }
+
+    def get_llm_classification_config(self):
+        """
+        NOUVELLE MÉTHODE : Génère la config LLM depuis sources.json
+        Cache le résultat pour éviter recalcul à chaque classification
+        """
+        if self._llm_config_cache is None:
+            candidate_labels = []
+            label_to_domain = {}
+            
+            # Génération automatique depuis sources.json
+            for domain_id, domain_config in self.domains_config.items():
+                # Option 1: Label explicite dans sources.json  
+                llm_label = domain_config.get('llm_label')
+                
+                # Option 2: Mapping automatique si pas de label explicite
+                if not llm_label:
+                    llm_label = self._auto_generate_llm_label(domain_id)
+                
+                candidate_labels.append(llm_label)
+                label_to_domain[llm_label] = domain_id
+            
+            self._llm_config_cache = (candidate_labels, label_to_domain)
+            logger.info(f"✅ Config LLM générée: {len(candidate_labels)} domaines dynamiques")
+        
+        return self._llm_config_cache
+    
+    def _auto_generate_llm_label(self, domain_id):
+        """Mapping automatique domain_id → label LLM (pour compatibilité)"""
+        # ✅ GARDE les labels existants pour compatibilité parfaite
+        mapping = {
+            'fraude_investissement': "investment fraud and scams",
+            'fraude_paiement': "payment and credit card fraud", 
+            'fraude_president_cyber': "CEO fraud and wire transfer scams",
+            'fraude_ecommerce': "e-commerce and online shopping fraud",
+            'supply_chain_cyber': "supply chain cyber attacks",
+            'intelligence_economique': "economic intelligence and business risks",
+            'fraude_crypto': "cryptocurrency fraud and scams",
+            'cyber_investigations': "cybercrime investigation and security breaches",
+            # ✅ NOUVEAUX domaines automatiquement supportés
+            'actualite_crypto': "cryptocurrency news and market developments",
+            'fraude_telephonique': "phone fraud and telecommunications scams"
+        }
+        
+        return mapping.get(domain_id, f"security risks related to {domain_id.replace('_', ' ')}")
+    
+    def reload_configuration(self):
+        """ÉTENDU : Invalide le cache LLM lors du rechargement"""
+        self._llm_config_cache = None  # ← Force regeneration
+        self.load_configuration()
+    
 
 # Instance globale de configuration
 config = ConfigManager()
@@ -222,49 +276,43 @@ def classify(title, content, source=""):
         return classify_fallback(title, content, source)
 
 def classify_with_llm(title, content, source):
-    """Classification utilisant un vrai LLM"""
+    """
+    Classification LLM - MODIFIÉE pour utiliser sources.json
+    ✅ GARDE exactement la même signature et comportement
+    ✅ CHANGE uniquement la source des domaines
+    """
     try:
-        # Préparation du texte pour le LLM
-        text_to_classify = f"{title}. {content[:1000]}"  # Limite pour performance
+        # ✅ AVANT : Domaines figés en dur
+        # candidate_labels = [
+        #     "investment fraud and scams",
+        #     "payment and credit card fraud", 
+        #     # ...
+        # ]
         
-        # Définition des catégories pour le modèle zero-shot
-        candidate_labels = [
-            "investment fraud and scams",
-            "payment and credit card fraud",
-            "CEO fraud and wire transfer scams",
-            "e-commerce and online shopping fraud",
-            "supply chain cyber attacks",
-            "economic intelligence and business risks",
-            "cryptocurrency fraud and scams",
-            "cybercrime investigation and security breaches"
-        ]
+        # ✅ APRÈS : Domaines dynamiques depuis sources.json
+        candidate_labels, label_to_domain = config.get_llm_classification_config()
         
-        # Mapping vers nos domaines
-        label_to_domain = {
-            "investment fraud and scams": "fraude_investissement",
-            "payment and credit card fraud": "fraude_paiement",
-            "CEO fraud and wire transfer scams": "fraude_president_cyber",
-            "e-commerce and online shopping fraud": "fraude_ecommerce",
-            "supply chain cyber attacks": "supply_chain_cyber",
-            "economic intelligence and business risks": "intelligence_economique",
-            "cryptocurrency fraud and scams": "fraude_crypto",
-            "cybercrime investigation and security breaches": "cyber_investigations"
-        }
+        # ✅ RESTE IDENTIQUE - Aucun autre changement
+        text_to_classify = f"{title}. {content[:1000]}"
         
-        # Classification par le LLM
         logger.info(f"🤖 Classification LLM pour: {title[:50]}...")
         result = classifier(text_to_classify, candidate_labels, multi_label=False)
         
-        # Extraction des résultats
         best_label = result['labels'][0]
         confidence = round(result['scores'][0] * 100, 1)
         
-        # Mapping vers notre domaine
+        # ✅ AVANT : Mapping figé
+        # label_to_domain = {
+        #     "investment fraud and scams": "fraude_investissement",
+        #     # ...
+        # }
+        
+        # ✅ APRÈS : Mapping dynamique (déjà généré plus haut)
         domain = label_to_domain.get(best_label, "cyber_investigations")
         
         logger.info(f"✅ LLM: {domain} ({confidence}%) - Label: {best_label}")
         
-        # Boost de confiance si la source correspond
+        # ✅ RESTE IDENTIQUE - Boost de confiance
         source_lower = source.lower()
         if ("amf" in source_lower and domain == "fraude_investissement") or \
            ("krebs" in source_lower and domain == "cyber_investigations") or \
@@ -567,22 +615,30 @@ def config_info():
 
 @app.route('/reload_config', methods=['POST'])
 def reload_config():
-    """Recharge la configuration sans redémarrer"""
+    """
+    ÉTENDU : Rechargement avec invalidation cache LLM
+    ✅ GARDE exactement la même route et comportement
+    ✅ AJOUTE juste l'invalidation du cache
+    """
     try:
         global config
-        config = ConfigManager()
+        config.reload_configuration()  # ← Utilise la nouvelle méthode qui invalide le cache
+        
+        # ✅ Test immédiat de la nouvelle config LLM
+        candidate_labels, label_to_domain = config.get_llm_classification_config()
         
         return jsonify({
             "status": "success",
             "message": "Configuration reloaded",
             "domains_count": len(config.domains_config),
+            "llm_domains_count": len(candidate_labels),  # ← NOUVEAU info
             "sources_count": len(config.sources_config),
             "timestamp": time.time()
         })
     except Exception as e:
         logger.error(f"❌ Erreur rechargement config: {e}")
         return jsonify({
-            "status": "error",
+            "status": "error", 
             "error": str(e)
         }), 500
 
