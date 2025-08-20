@@ -41,7 +41,48 @@ echo "    📊 $MODEL_COUNT modèles trouvés"
 echo "  ⚙️ Configuration..."
 [ -f "config/sources.json" ] && echo "    ✅ sources.json" || { echo "    ❌ sources.json"; ((ERRORS++)); }
 
-echo ""
+
+# Tests Node-RED (PATCH AJOUTÉ)
+echo "🌐 Tests Node-RED..."
+
+# Structure Node-RED
+[ -d "node_red_native" ] && echo "  ✅ node_red_native/" || { echo "  ❌ node_red_native/ manquant"; ((ERRORS++)); }
+[ -f "node_red_native/package.json" ] && echo "  ✅ package.json" || { echo "  ❌ package.json manquant"; ((ERRORS++)); }
+
+# Installation Node-RED
+if [ -d "node_red_native/node_modules/node-red" ]; then
+    echo "  ✅ Node-RED installé"
+else
+    echo "  ❌ Node-RED non installé"
+    ((ERRORS++))
+fi
+
+# Modules RSS
+if [ -d "node_red_native/node_modules/node-red-node-feedparser" ]; then
+    echo "  ✅ Module feedparser"
+else  
+    echo "  ❌ Module feedparser manquant"
+    ((ERRORS++))
+fi
+
+# Flows configurés
+if [ -f "node_red_native/userdir/flows.json" ]; then
+    FLOW_COUNT=$(jq length node_red_native/userdir/flows.json 2>/dev/null || echo "0")
+    echo "  ✅ Flows: $FLOW_COUNT noeuds"
+else
+    echo "  ❌ Flows manquants"
+    ((ERRORS++))
+fi
+
+# Node.js disponible
+if command -v node &>/dev/null; then
+    NODE_VERSION=$(node --version)
+    echo "  ✅ Node.js $NODE_VERSION"
+else
+    echo "  ❌ Node.js manquant"
+    ((ERRORS++))
+fi
+
 if [ "$ERRORS" -eq 0 ]; then
     echo "✅ Tous les tests passent !"
     echo "🚀 Prêt pour démarrage avec ./start_pipeline.sh"
@@ -51,3 +92,4 @@ else
 fi
 
 exit $ERRORS
+if [ "$ERRORS" -eq 0 ]; then
