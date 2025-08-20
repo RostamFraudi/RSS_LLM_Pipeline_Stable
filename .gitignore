@@ -1,57 +1,257 @@
+# === RSS LLM Pipeline Native - .gitignore Optimisé ===
+# Fichier optimisé pour distribution GitHub
 
-*~
-# === Ajouts post-migration ===
-# Archives et sauvegardes
-# Articles générés (structure préservée)
-backup_*/
-*.bin
-build/
-# Builds et compilation
-.cache/
-config.local.json
-# Configuration locale
-.coverage
-coverage.xml
-deployment_native/
-.DS_Store
-.env
-# Fichiers temporaires
-.flows_cred.json.backup
-.flows.json.backup
-*.gguf
-htmlcov/
-.idea/
+# =====================================
+# ÉLÉMENTS VOLUMINEUX À EXCLURE
+# =====================================
+
+# llama.cpp (sera cloné automatiquement lors de l'installation)
 llama.cpp/
-# llama.cpp (cloné et compilé automatiquement)
-*.local.*
-*.log
-logs/
-# Modèles (téléchargés automatiquement)
-models/
-node_modules/
-node_red_data/
-node_red_local/
-node_red_native/
-# Node-RED runtime
-!obsidian_vault/articles/.gitkeep
-obsidian_vault/articles/**/*.md
-# OS et IDE
-pip-log.txt
-*.pyc
-__pycache__/
-*.pyo
-.pytest_cache/
-# Python
-.Python
-# Répertoires volumineux (installés automatiquement)
-# === RSS LLM Pipeline Native - .gitignore ===
-*.swp
-*.tar.gz
-temp/
-tests/
-# Tests
-Thumbs.db
-tmp/
+
+# Environnements Python (seront créés lors de l'installation)
 venv/
+env/
+.venv/
+.env/
+
+# Modèles GGUF (seront téléchargés lors de l'installation)
+models/
+*.gguf
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# =====================================
+# BUILDS ET COMPILATION
+# =====================================
+
+# Builds llama.cpp
+build/
+builds/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# =====================================
+# NODE-RED ET JAVASCRIPT
+# =====================================
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Node-RED runtime data
+node_red_local/
+node_red_data/
+node_red_native/
+.flows.json.backup
+.flows_cred.json.backup
+flows_cred.json
+
+# =====================================
+# LOGS ET TEMPORAIRES
+# =====================================
+
+# Logs
+logs/
+*.log
+log/
+
+# Temporaires
+tmp/
+temp/
+.cache/
+.tmp/
+
+# =====================================
+# ANCIENS SCRIPTS ET DEPLOYMENT
+# =====================================
+
+# Anciens scripts de déploiement (remplacés par install.sh)
+deployment_native/
+docker/
+.devcontainer/
+
+# Tests et développement
+tests/
+test_results/
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+
+# =====================================
+# DONNÉES GÉNÉRÉES
+# =====================================
+
+# Articles Obsidian générés (garder structure)
+obsidian_vault/articles/**/*.md
+!obsidian_vault/articles/.gitkeep
+!obsidian_vault/articles/README.md
+
+# Données utilisateur
+data/
+database/
+*.db
+*.sqlite
+*.sqlite3
+
+# =====================================
+# CONFIGURATION LOCALE
+# =====================================
+
+# Fichiers de configuration locale
+.env
+.env.local
+.env.*.local
+config.local.json
+settings.local.json
+*.local.*
+
+# Secrets et clés
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# =====================================
+# OS ET IDE
+# =====================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# IDE et éditeurs
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+.sublime-*
+*.code-workspace
+
+# =====================================
+# ARCHIVES ET SAUVEGARDES
+# =====================================
+
+# Archives
+*.tar.gz
+*.tar.bz2
+*.tar.xz
 *.zip
+*.rar
+*.7z
+
+# Sauvegardes
+backup_*/
+*.backup
+*.bak
+*.orig
+
+# =====================================
+# SYSTÈME DE CONTRÔLE DE VERSION
+# =====================================
+
+# Git
+.git/
+*.patch
+*.diff
+
+# Autres VCS
+.svn/
+.hg/
+.bzr/
+
+# =====================================
+# SPÉCIFIQUE AU PROJET
+# =====================================
+
+# Anciens flows Node-RED (si multiples versions)
+flows_*.json
+!flows.json
+
+# Anciens READMEs de migration
+README_old.md
+README_backup.md
+
+# Scripts de migration temporaires (garder uniquement les principaux)
+migrate_*.sh
+!migrate_to_clean_branch.sh
+cleanup_*.sh
+!cleanup_migration.sh
+
+# Fichiers de développement
+dev/
+development/
+sandbox/
+
+# =====================================
+# PERFORMANCES ET MONITORING
+# =====================================
+
+# Profiling
+profile/
+*.prof
+.profiling/
+
+# Monitoring
+monitoring/
+metrics/
+
+# =====================================
+# DOCUMENTATION GÉNÉRÉE
+# =====================================
+
+# Documentation auto-générée (garder documentation manuelle)
+docs/build/
+docs/_build/
+site/
+
+# =====================================
+# CONTENU UTILISATEUR
+# =====================================
+
+# Uploads et contenu utilisateur
+uploads/
+media/
+static/uploads/
+
+# Bases de données de développement
+*.dev.db
+dev.sqlite
+
+# =====================================
+# FIN DU FICHIER .gitignore
+# =====================================
+
+# Ce fichier exclut tous les éléments volumineux ou temporaires
+# tout en conservant le code source essentiel pour la distribution
