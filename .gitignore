@@ -1,60 +1,57 @@
-# === RSS LLM Pipeline Native - .gitignore ===
 
-# Python
-venv/
-__pycache__/
-*.pyc
-*.pyo
-.Python
-pip-log.txt
+*~
+# === Ajouts post-migration ===
+# Archives et sauvegardes
+# Articles générés (structure préservée)
+backup_*/
+*.bin
+build/
+# Builds et compilation
+.cache/
+config.local.json
+# Configuration locale
 .coverage
-
+coverage.xml
+deployment_native/
+.DS_Store
+.env
+# Fichiers temporaires
+.flows_cred.json.backup
+.flows.json.backup
+*.gguf
+htmlcov/
+.idea/
+llama.cpp/
+# llama.cpp (cloné et compilé automatiquement)
+*.local.*
+*.log
+logs/
 # Modèles (téléchargés automatiquement)
 models/
-*.gguf
-*.bin
-
-# llama.cpp (cloné et compilé automatiquement)
-llama.cpp/
-
-# Builds et compilation
-build/
-tmp/
-temp/
-.cache/
-logs/
-*.log
-
-# Node-RED runtime
-node_red_local/
-node_red_data/
 node_modules/
-.flows.json.backup
-.flows_cred.json.backup
-
-# Articles générés (structure préservée)
-obsidian_vault/articles/**/*.md
+node_red_data/
+node_red_local/
+node_red_native/
+# Node-RED runtime
 !obsidian_vault/articles/.gitkeep
-
-# Configuration locale
-.env
-config.local.json
-*.local.*
-
+obsidian_vault/articles/**/*.md
 # OS et IDE
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-*.swp
-*~
-
-# Tests
+pip-log.txt
+*.pyc
+__pycache__/
+*.pyo
 .pytest_cache/
-coverage.xml
-htmlcov/
-
-# Archives et sauvegardes
+# Python
+.Python
+# Répertoires volumineux (installés automatiquement)
+# === RSS LLM Pipeline Native - .gitignore ===
+*.swp
 *.tar.gz
+temp/
+tests/
+# Tests
+Thumbs.db
+tmp/
+venv/
+.vscode/
 *.zip
-backup_*/
