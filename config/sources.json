@@ -1,0 +1,94 @@
+{
+  "_metadata": {
+    "version": "3.0_native_llama",
+    "description": "Configuration RSS + LLM avec llama.cpp natif",
+    "last_updated": "2025-08-20"
+  },
+  "sources": [
+    {
+      "name": "CERT-FR",
+      "url": "https://www.cert.ssi.gouv.fr/alerte/feed/",
+      "domain": "cyber_investigations",
+      "priority": "high",
+      "keywords": ["vulnérabilité", "cyberattaque", "sécurité", "alerte"]
+    },
+    {
+      "name": "ZATAZ",
+      "url": "https://www.zataz.com/feed",
+      "domain": "cyber_investigations",
+      "priority": "high",
+      "keywords": ["cybersécurité", "piratage", "fraude", "enquête"]
+    },
+    {
+      "name": "AMF",
+      "url": "https://www.amf-france.org/fr/flux-rss/display/28",
+      "domain": "fraude_investissement",
+      "priority": "medium",
+      "keywords": ["investissement", "arnaque", "escroquerie", "placement"]
+    }
+  ],
+  "domains": {
+    "fraude_investissement": {
+      "label": "Fraude aux Investissements",
+      "emoji": "💰",
+      "output_folder": "fraude-investissement",
+      "prompt_template": "classify_investment_fraud"
+    },
+    "fraude_paiement": {
+      "label": "Fraude aux Moyens de Paiement", 
+      "emoji": "💳",
+      "output_folder": "fraude-paiement",
+      "prompt_template": "classify_payment_fraud"
+    },
+    "fraude_president_cyber": {
+      "label": "Fraude au Président & FOVI",
+      "emoji": "🎭", 
+      "output_folder": "fraude-president",
+      "prompt_template": "classify_ceo_fraud"
+    },
+    "fraude_ecommerce": {
+      "label": "Fraude E-commerce",
+      "emoji": "🛒",
+      "output_folder": "fraude-ecommerce", 
+      "prompt_template": "classify_ecommerce_fraud"
+    },
+    "supply_chain_cyber": {
+      "label": "Cyberattaques Supply Chain",
+      "emoji": "🔗",
+      "output_folder": "supply-chain-cyber",
+      "prompt_template": "classify_supply_chain"
+    },
+    "intelligence_economique": {
+      "label": "Intelligence Économique",
+      "emoji": "🕵️",
+      "output_folder": "intelligence-economique",
+      "prompt_template": "classify_business_intel"
+    },
+    "fraude_crypto": {
+      "label": "Fraude Cryptomonnaies",
+      "emoji": "₿",
+      "output_folder": "fraude-crypto",
+      "prompt_template": "classify_crypto_fraud"
+    },
+    "cyber_investigations": {
+      "label": "Investigations Cybercriminalité", 
+      "emoji": "🔍",
+      "output_folder": "cyber-investigations",
+      "prompt_template": "classify_cyber_investigations"
+    }
+  },
+  "llama_config": {
+    "classification_server": {
+      "url": "http://localhost:8080",
+      "model": "tinyllama-1.1b-q4.gguf",
+      "max_tokens": 20,
+      "temperature": 0.1
+    },
+    "summary_server": {
+      "url": "http://localhost:8081", 
+      "model": "qwen2-0.5b-q4.gguf",
+      "max_tokens": 200,
+      "temperature": 0.3
+    }
+  }
+}

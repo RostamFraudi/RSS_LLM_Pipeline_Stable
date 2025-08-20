@@ -1,0 +1,9 @@
+# RSS LLM Service Native - Dépendances légères
+flask==2.3.3
+requests==2.31.0
+python-dateutil==2.8.2
+feedparser==6.0.10
+python-dotenv==1.0.0
+
+# Pas de transformers, torch, tensorflow !
+# Total: ~50MB vs 2GB+ pour transformers

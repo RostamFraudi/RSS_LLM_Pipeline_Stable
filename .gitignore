@@ -1,0 +1,60 @@
+# === RSS LLM Pipeline Native - .gitignore ===
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.Python
+pip-log.txt
+.coverage
+
+# Modèles (téléchargés automatiquement)
+models/
+*.gguf
+*.bin
+
+# llama.cpp (cloné et compilé automatiquement)
+llama.cpp/
+
+# Builds et compilation
+build/
+tmp/
+temp/
+.cache/
+logs/
+*.log
+
+# Node-RED runtime
+node_red_local/
+node_red_data/
+node_modules/
+.flows.json.backup
+.flows_cred.json.backup
+
+# Articles générés (structure préservée)
+obsidian_vault/articles/**/*.md
+!obsidian_vault/articles/.gitkeep
+
+# Configuration locale
+.env
+config.local.json
+*.local.*
+
+# OS et IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
+
+# Tests
+.pytest_cache/
+coverage.xml
+htmlcov/
+
+# Archives et sauvegardes
+*.tar.gz
+*.zip
+backup_*/

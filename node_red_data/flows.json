@@ -1,0 +1,755 @@
+[
+    {
+        "id": "0a5009b6c9f2d0f8",
+        "type": "tab",
+        "label": "Flux 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a286e71930bddf50",
+        "type": "tab",
+        "label": "RSS Pipeline Native v3.1",
+        "disabled": false,
+        "info": "Pipeline RSS + LLM avec architecture native (llama.cpp + venv Python)"
+    },
+    {
+        "id": "7e081f306d97e6eb",
+        "type": "group",
+        "z": "a286e71930bddf50",
+        "name": "SOURCES",
+        "style": {
+            "stroke": "#3f93cf",
+            "fill": "#bfdbef",
+            "label": true
+        },
+        "nodes": [
+            "ced5a1942934a354",
+            "b0628ca5f2bae48a",
+            "d84a5bc5e8999686",
+            "c9d1a9a53fa4d259",
+            "5e0f8e9f4deb0d64",
+            "81a2803f3e5a185f"
+        ],
+        "x": 514,
+        "y": 99,
+        "w": 272,
+        "h": 382
+    },
+    {
+        "id": "84c6e14812f48c18",
+        "type": "group",
+        "z": "a286e71930bddf50",
+        "name": "Pré-traitement",
+        "style": {
+            "stroke": "#ffdf7f",
+            "fill": "#ffefbf",
+            "label": true
+        },
+        "nodes": [
+            "1326f6c0ff564efe",
+            "67e53dd386dc1fa0",
+            "b8524d09134466d9",
+            "4bde8394fcc94f98",
+            "fe2411334b8e790e",
+            "ff1249b485e6f9d6",
+            "366b4fa1a98cc202"
+        ],
+        "x": 834,
+        "y": 99,
+        "w": 282,
+        "h": 442
+    },
+    {
+        "id": "6f583ff8a5c124d2",
+        "type": "group",
+        "z": "a286e71930bddf50",
+        "name": "LLMs Native",
+        "style": {
+            "stroke": "#ff3f3f",
+            "fill": "#ffbfbf",
+            "label": true
+        },
+        "nodes": [
+            "health_check_native",
+            "e8c2cbdd77973481",
+            "31d5fa8a7e887603",
+            "adda75fb4c9b6316"
+        ],
+        "x": 1184,
+        "y": 79,
+        "w": 322,
+        "h": 222
+    },
+    {
+        "id": "24a5d19a2bf69b70",
+        "type": "group",
+        "z": "a286e71930bddf50",
+        "name": "CONFIGURATION",
+        "style": {
+            "fill": "#d1d1d1",
+            "label": true
+        },
+        "nodes": [
+            "4d70a06815ee11b5",
+            "3113abf5266df5a6",
+            "a0962f8cd2076370"
+        ],
+        "x": 54,
+        "y": 359,
+        "w": 442,
+        "h": 162
+    },
+    {
+        "id": "6c76fb3fd0b8defb",
+        "type": "group",
+        "z": "a286e71930bddf50",
+        "name": "OUTPUT",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "f1dcc003bee4cd3a",
+            "ca4a2ad5526289b6"
+        ],
+        "x": 1154,
+        "y": 679,
+        "w": 512,
+        "h": 82
+    },
+    {
+        "id": "87fb0cb215ca48be",
+        "type": "group",
+        "z": "a286e71930bddf50",
+        "name": "Post-traitement",
+        "style": {
+            "stroke": "#ffff3f",
+            "fill": "#ffffbf",
+            "label": true
+        },
+        "nodes": [
+            "22ada62db320bf9b",
+            "7769f131d6b901a6",
+            "e4a5576ef4ec20da"
+        ],
+        "x": 1204,
+        "y": 339,
+        "w": 302,
+        "h": 202
+    },
+    {
+        "id": "4d70a06815ee11b5",
+        "type": "inject",
+        "z": "a286e71930bddf50",
+        "g": "24a5d19a2bf69b70",
+        "name": "🔄 Démarrer Pipeline",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 400,
+        "wires": [
+            [
+                "a0962f8cd2076370"
+            ]
+        ]
+    },
+    {
+        "id": "3113abf5266df5a6",
+        "type": "inject",
+        "z": "a286e71930bddf50",
+        "g": "24a5d19a2bf69b70",
+        "name": "⏰ Auto (30min)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "1800",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 210,
+        "y": 480,
+        "wires": [
+            [
+                "a0962f8cd2076370"
+            ]
+        ]
+    },
+    {
+        "id": "ced5a1942934a354",
+        "type": "file in",
+        "z": "a286e71930bddf50",
+        "g": "7e081f306d97e6eb",
+        "name": "📁 Charger sources.json",
+        "filename": "config/sources.json",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 650,
+        "y": 440,
+        "wires": [
+            [
+                "b0628ca5f2bae48a"
+            ]
+        ]
+    },
+    {
+        "id": "b0628ca5f2bae48a",
+        "type": "json",
+        "z": "a286e71930bddf50",
+        "g": "7e081f306d97e6eb",
+        "name": "🔧 Parser JSON",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 650,
+        "y": 380,
+        "wires": [
+            [
+                "d84a5bc5e8999686"
+            ]
+        ]
+    },
+    {
+        "id": "d84a5bc5e8999686",
+        "type": "change",
+        "z": "a286e71930bddf50",
+        "g": "7e081f306d97e6eb",
+        "name": "📝 Extraire sources",
+        "rules": [
+            {
+                "t": "move",
+                "p": "payload.sources",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "categories",
+                "pt": "msg",
+                "to": "payload.categories",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 640,
+        "y": 320,
+        "wires": [
+            [
+                "c9d1a9a53fa4d259"
+            ]
+        ]
+    },
+    {
+        "id": "c9d1a9a53fa4d259",
+        "type": "split",
+        "z": "a286e71930bddf50",
+        "g": "7e081f306d97e6eb",
+        "name": "📋 Split sources",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "topic",
+        "property": "payload",
+        "x": 640,
+        "y": 260,
+        "wires": [
+            [
+                "5e0f8e9f4deb0d64"
+            ]
+        ]
+    },
+    {
+        "id": "5e0f8e9f4deb0d64",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "7e081f306d97e6eb",
+        "name": "📝 Préparer URL",
+        "func": "msg.url = msg.payload.url;\nmsg.sourceInfo = msg.payload;\nnode.warn(`🔄 Traitement: ${msg.payload.name}`);\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 200,
+        "wires": [
+            [
+                "81a2803f3e5a185f"
+            ]
+        ]
+    },
+    {
+        "id": "81a2803f3e5a185f",
+        "type": "http request",
+        "z": "a286e71930bddf50",
+        "g": "7e081f306d97e6eb",
+        "name": "🌐 Récupérer RSS",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "User-Agent",
+                "keyValue": "",
+                "valueType": "other",
+                "valueValue": "RSS-Pipeline-Native/3.1"
+            }
+        ],
+        "x": 650,
+        "y": 140,
+        "wires": [
+            [
+                "4bde8394fcc94f98"
+            ]
+        ]
+    },
+    {
+        "id": "1326f6c0ff564efe",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "📊 Extraire articles",
+        "func": "var rss = msg.payload;\nvar items = [];\n\nnode.warn(\"=== EXTRACTION PIPELINE NATIVE ===\");\nnode.warn(`Source: ${msg.sourceInfo.name}`);\n\nif (rss.rss && rss.rss.channel) {\n    node.warn(\"Format RSS 2.0 détecté\");\n    if (rss.rss.channel.item) {\n        items = rss.rss.channel.item;\n    }\n} else if (rss.feed) {\n    node.warn(\"Format Atom détecté\");\n    if (rss.feed.entry) {\n        items = rss.feed.entry;\n    }\n} else if (rss.channel) {\n    node.warn(\"Format RSS direct détecté\");\n    if (rss.channel.item) {\n        items = rss.channel.item;\n    }\n}\n\nif (!Array.isArray(items)) {\n    items = [items];\n}\n\nvar maxArticles = 5;\nif (items.length > maxArticles) {\n    items = items.slice(0, maxArticles);\n    node.warn(`✂️ LIMITATION NATIVE: ${maxArticles} articles`);\n}\n\nif (items.length === 0) {\n    node.warn(\"Aucun article trouvé\");\n    return null;\n}\n\nmsg.payload = items;\nnode.warn(`✅ ${items.length} articles à traiter`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 200,
+        "wires": [
+            [
+                "67e53dd386dc1fa0"
+            ]
+        ]
+    },
+    {
+        "id": "67e53dd386dc1fa0",
+        "type": "split",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "📋 Split articles",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "property": "payload",
+        "x": 960,
+        "y": 260,
+        "wires": [
+            [
+                "366b4fa1a98cc202"
+            ]
+        ]
+    },
+    {
+        "id": "b8524d09134466d9",
+        "type": "change",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "📝 Construire article",
+        "rules": [
+            {
+                "t": "set",
+                "p": "article.title",
+                "pt": "msg",
+                "to": "payload.title",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "article.link",
+                "pt": "msg",
+                "to": "payload.link",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "article.description",
+                "pt": "msg",
+                "to": "payload.description",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "article.source",
+                "pt": "msg",
+                "to": "sourceInfo.name",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "article.category",
+                "pt": "msg",
+                "to": "sourceInfo.category",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "article.pubDate",
+                "pt": "msg",
+                "to": "payload.pubDate",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 380,
+        "wires": [
+            [
+                "ff1249b485e6f9d6"
+            ]
+        ]
+    },
+    {
+        "id": "4bde8394fcc94f98",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "Parser RSS",
+        "func": "var xmlString = msg.payload;\n\nif (typeof xmlString !== 'string') {\n    node.error(\"RSS n'est pas une chaîne\");\n    return null;\n}\n\ntry {\n    var items = [];\n    var itemMatches = xmlString.match(/<item[^>]*>[\\s\\S]*?<\\/item>/gi) || [];\n    \n    itemMatches.forEach((itemXml, index) => {\n        function extractTag(xml, tagName) {\n            var regex = new RegExp(`<${tagName}[^>]*>([\\\\s\\\\S]*?)<\\\\/${tagName}>`, 'i');\n            var match = xml.match(regex);\n            if (match && match[1]) {\n                var content = match[1].replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g, '$1');\n                return content.trim();\n            }\n            return '';\n        }\n        \n        var title = extractTag(itemXml, 'title') || 'Titre manquant';\n        var link = extractTag(itemXml, 'link') || '#';\n        var description = extractTag(itemXml, 'description') || '';\n        var pubDate = extractTag(itemXml, 'pubDate') || new Date().toISOString();\n        \n        title = title.replace(/<[^>]*>/g, '').trim();\n        description = description.replace(/<[^>]*>/g, '').trim();\n        \n        var article = {\n            title: title,\n            link: link,\n            description: description,\n            pubDate: pubDate\n        };\n        \n        items.push(article);\n    });\n    \n    if (items.length === 0) {\n        return null;\n    }\n    \n    msg.payload = {\n        rss: {\n            channel: {\n                item: items\n            }\n        }\n    };\n    \n    return msg;\n    \n} catch (error) {\n    node.error(\"Erreur parsing RSS: \" + error.message);\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 140,
+        "wires": [
+            [
+                "1326f6c0ff564efe"
+            ]
+        ]
+    },
+    {
+        "id": "fe2411334b8e790e",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "📝 Formatter Article",
+        "func": "const article = msg.article;\n\nif (!article || typeof article !== 'object') {\n    node.error(\"msg.article manquant\");\n    return null;\n}\n\nconst title = article.title || 'Titre manquant';\nconst description = article.description || 'Description manquante';\nconst cleanDescription = description.replace(/<[^>]*>/g, '').trim().substring(0, 800);\n\nif (title === 'Titre manquant' || cleanDescription.length === 0) {\n    node.warn(\"Article incomplet, ignoré\");\n    return null;\n}\n\nmsg.payload = {\n    title: title,\n    content: cleanDescription,\n    source: article.source || 'RSS'\n};\n\nnode.warn(`✅ Article formaté: ${title.substring(0, 50)}...`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 980,
+        "y": 500,
+        "wires": [
+            [
+                "health_check_native"
+            ]
+        ]
+    },
+    {
+        "id": "health_check_native",
+        "type": "http request",
+        "z": "a286e71930bddf50",
+        "g": "6f583ff8a5c124d2",
+        "name": "🩺 Health Check Native",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://localhost:15000/health",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1320,
+        "y": 120,
+        "wires": [
+            [
+                "e8c2cbdd77973481"
+            ]
+        ]
+    },
+    {
+        "id": "e8c2cbdd77973481",
+        "type": "http request",
+        "z": "a286e71930bddf50",
+        "g": "6f583ff8a5c124d2",
+        "name": "🧠 Classification Native",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://localhost:15000/generate_metadata",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "Content-Type",
+                "keyValue": "",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 1340,
+        "y": 160,
+        "wires": [
+            [
+                "31d5fa8a7e887603"
+            ]
+        ]
+    },
+    {
+        "id": "31d5fa8a7e887603",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "6f583ff8a5c124d2",
+        "name": "🔄 Préparer Résumé Native",
+        "func": "const article = msg.article;\nconst metadata = msg.payload;\n\nmsg.generate_metadata = metadata;\nmsg.classification_v2 = metadata;\n\narticle.domain = metadata.domain;\n\nmsg.payload = {\n    title: article.title,\n    content: article.description,\n    domain: metadata.domain\n};\n\nnode.warn(`🏷️ Domaine: ${metadata.domain}`);\nnode.warn(`🎯 Confiance: ${metadata.confidence}%`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1360,
+        "y": 200,
+        "wires": [
+            [
+                "adda75fb4c9b6316"
+            ]
+        ]
+    },
+    {
+        "id": "adda75fb4c9b6316",
+        "type": "http request",
+        "z": "a286e71930bddf50",
+        "g": "6f583ff8a5c124d2",
+        "name": "✍️ Résumé Native",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://localhost:15000/summarize",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "Content-Type",
+                "keyValue": "",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 1350,
+        "y": 260,
+        "wires": [
+            [
+                "22ada62db320bf9b"
+            ]
+        ]
+    },
+    {
+        "id": "22ada62db320bf9b",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "87fb0cb215ca48be",
+        "name": "🔄 Traiter Résumé Native",
+        "func": "const summaryResult = msg.payload;\n\nif (summaryResult && summaryResult.summary) {\n    msg.article.summary = summaryResult.summary;\n} else {\n    msg.article.summary = \"Résumé non disponible\";\n}\n\nmsg.payload = summaryResult;\n\nnode.warn(`✅ Résumé traité`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1340,
+        "y": 380,
+        "wires": [
+            [
+                "7769f131d6b901a6"
+            ]
+        ]
+    },
+    {
+        "id": "7769f131d6b901a6",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "87fb0cb215ca48be",
+        "name": "🧹 Nettoyer données",
+        "func": "if (msg.article.title) {\n    msg.article.title = String(msg.article.title).replace(/<[^>]*>/g, '').trim();\n}\n\nif (msg.article.description) {\n    msg.article.description = String(msg.article.description).replace(/<[^>]*>/g, '').trim();\n}\n\nmsg.article.processedDate = new Date().toISOString().split('T')[0];\n\nvar domain = msg.generate_metadata?.domain || 'autre';\nvar folderName = domain.replace(/_/g, '-');\nvar safeTitle = msg.article.title.replace(/[^a-zA-Z0-9À-ÿ\\s]/g, '').substring(0, 40).replace(/\\s+/g, '_');\nmsg.filename = `obsidian_vault/articles/${folderName}/${msg.article.processedDate}_${safeTitle}.md`;\n\nnode.warn(`📄 Article nettoyé: ${msg.article.title.substring(0, 50)}...`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1340,
+        "y": 440,
+        "wires": [
+            [
+                "e4a5576ef4ec20da"
+            ]
+        ]
+    },
+    {
+        "id": "e4a5576ef4ec20da",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "87fb0cb215ca48be",
+        "name": "💾 Créer Markdown Native",
+        "func": "try {\n  const article = msg.article;\n  const metadata = msg.generate_metadata || {};\n  const summaryResult = msg.payload;\n\n  const domain = metadata.domain || 'autre';\n  const confidence = metadata.confidence || 50;\n  const alertLevel = metadata.alert_level || 'info';\n  \n  const pubDate = new Date(article.pubDate || new Date());\n  const now = new Date();\n  \n  const pubDateStr = pubDate.toISOString().split('T')[0];\n  const processedStr = now.toISOString().split('T')[0];\n  \n  const markdown = `---\ntitle: \"${article.title.replace(/\"/g, '\\\\\"')}\"\nsource: \"${article.source}\"\ndomain: \"${domain}\"\npublication_date: ${article.pubDate}\nprocessed_date: ${now.toISOString()}\nurl: \"${article.link}\"\nalert_level: \"${alertLevel}\"\nconfidence: ${confidence}\npipeline_version: \"native_v3.1\"\n---\n\n# ${article.title}\n\n> **${article.source}** | 📅 **${pubDateStr}** | 🎯 **${confidence}%**\n\n## 📝 Résumé\n\n${summaryResult.summary || 'Résumé non disponible'}\n\n## 📄 Contenu\n\n${article.description}\n\n---\n\n*Traité par Pipeline RSS + LLM Native v3.1 • ${processedStr}*`;\n\n  msg.payload = markdown;\n  \n  node.warn(`💾 Markdown créé pour: ${article.title.substring(0, 40)}...`);\n  \n  return msg;\n\n} catch (error) {\n  node.error(`💥 Erreur création markdown: ${error.message}`);\n  \n  msg.payload = `# ❌ Erreur Pipeline Native\\n\\n**Erreur**: ${error.message}\\n**Date**: ${new Date().toISOString()}`;\n  msg.filename = 'obsidian_vault/articles/errors/' + new Date().toISOString().split('T')[0] + '_error.md';\n  \n  return msg;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1360,
+        "y": 500,
+        "wires": [
+            [
+                "ca4a2ad5526289b6"
+            ]
+        ]
+    },
+    {
+        "id": "f1dcc003bee4cd3a",
+        "type": "debug",
+        "z": "a286e71930bddf50",
+        "g": "6c76fb3fd0b8defb",
+        "name": "✅ Succès Native",
+        "active": true,
+        "complete": "filename",
+        "x": 1530,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "ca4a2ad5526289b6",
+        "type": "file",
+        "z": "a286e71930bddf50",
+        "g": "6c76fb3fd0b8defb",
+        "name": "💾 Save Obsidian",
+        "filename": "filename",
+        "filenameType": "msg",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "utf8",
+        "x": 1270,
+        "y": 720,
+        "wires": [
+            [
+                "f1dcc003bee4cd3a"
+            ]
+        ]
+    },
+    {
+        "id": "ff1249b485e6f9d6",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "🔄 Préparer Classification",
+        "func": "if (!msg.article.title || !msg.article.description) {\n    node.error(`❌ Classification impossible - données manquantes`);\n    return null;\n}\n\nmsg.payload = {\n    title: msg.article.title,\n    content: msg.article.description,\n    source: msg.article.source || 'RSS'\n};\n\nnode.warn(`🔍 Classification: ${msg.article.title.substring(0, 50)}...`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 980,
+        "y": 440,
+        "wires": [
+            [
+                "fe2411334b8e790e"
+            ]
+        ]
+    },
+    {
+        "id": "a0962f8cd2076370",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "24a5d19a2bf69b70",
+        "name": "Config Native",
+        "func": "global.set('pipeline_config', null);\nglobal.set('session_stats', null);\n\nnode.warn(\"🧹 RESET: Variables globales vidées (Pipeline Native)\");\n\nvar config = {\n    max_articles_per_run: 20,\n    enable_deduplication: true,\n    processed_articles: new Set(),\n    pipeline_version: 'native_v3.1'\n};\n\nconfig.hours_lookback = 24;\n\nglobal.set('pipeline_config', config);\n\nvar session_stats = {\n    execution_id: Date.now(),\n    start_time: new Date().toISOString(),\n    max_articles: config.max_articles_per_run,\n    processed_count: 0,\n    skipped_count: 0,\n    pipeline_version: 'native_v3.1'\n};\nglobal.set('session_stats', session_stats);\n\nmsg.maxArticles = config.max_articles_per_run;\nmsg.acceptHistorical = true;\nmsg.pipelineVersion = 'native_v3.1';\n\nnode.warn(\"=== CONFIGURATION PIPELINE NATIVE v3.1 ===\");\nnode.warn(`🚀 Version: ${config.pipeline_version}`);\nnode.warn(`⏰ PÉRIODE: ${config.hours_lookback} dernières heures`);\nnode.warn(`🎯 LIMITE: ${config.max_articles_per_run} articles max`);\nnode.warn(`📊 API: localhost:15000 (Pipeline Native)`);\nnode.warn(`🦙 LLM: llama.cpp + TinyLlama + Qwen2`);\nnode.warn(\"=========================================\");\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 440,
+        "wires": [
+            [
+                "ced5a1942934a354"
+            ]
+        ]
+    },
+    {
+        "id": "366b4fa1a98cc202",
+        "type": "function",
+        "z": "a286e71930bddf50",
+        "g": "84c6e14812f48c18",
+        "name": "Filter Article Native",
+        "func": "var session = global.get('session_stats');\nvar config = global.get('pipeline_config');\n\nif (!session || !config) {\n    node.error(\"❌ Configuration Native manquante\");\n    return null;\n}\n\nif (session.processed_count >= session.max_articles) {\n    node.warn(`⏹️ LIMITE NATIVE ATTEINTE: ${session.processed_count}/${session.max_articles}`);\n    return null;\n}\n\nvar article = msg.payload;\nif (!article || !article.title) {\n    session.skipped_count++;\n    global.set('session_stats', session);\n    node.warn(\"❌ Article invalide\");\n    return null;\n}\n\nvar article_date = new Date(article.pubDate || new Date());\nnode.warn(`🔍 ANALYSE NATIVE: \"${article.title.substring(0, 50)}...\"`);\n\nvar title_clean = article.title.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 30);\nvar link_clean = (article.link || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 30);\nvar unique_id = `${title_clean}_${link_clean}`;\n\nif (config.enable_deduplication && config.processed_articles.has(unique_id)) {\n    session.skipped_count++;\n    global.set('session_stats', session);\n    node.warn(`⏭️ DÉJÀ TRAITÉ`);\n    return null;\n}\n\nvar now = new Date();\nif (config.hours_lookback) {\n    var cutoff = new Date(now.getTime() - (config.hours_lookback * 60 * 60 * 1000));\n    \n    if (article_date < cutoff) {\n        session.skipped_count++;\n        global.set('session_stats', session);\n        node.warn(`❌ TROP ANCIEN`);\n        return null;\n    }\n}\n\nconfig.processed_articles.add(unique_id);\nsession.processed_count++;\n\nif (config.processed_articles.size > 100) {\n    var articles_array = Array.from(config.processed_articles);\n    config.processed_articles = new Set(articles_array.slice(-50));\n}\n\nglobal.set('pipeline_config', config);\nglobal.set('session_stats', session);\n\nnode.warn(`✅ ARTICLE NATIF VALIDÉ ${session.processed_count}/${session.max_articles}`);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 980,
+        "y": 320,
+        "wires": [
+            [
+                "b8524d09134466d9"
+            ]
+        ]
+    }
+]

@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "node-red-contrib-fs": "^1.4.1",
+    "node-red-node-feedparser": "^0.3.0"
+  }
+}
