@@ -41,7 +41,7 @@ RSS_LLM_Pipeline_Native/
 - **Classification** : http://localhost:8080 (TinyLlama)
 - **Résumés** : http://localhost:8081 (Qwen2)
 - **API Service** : http://localhost:15000
-- **Node-RED** : http://localhost:1880
+- **Node-RED** : http://localhost:18880
 
 ### Domaines Supportés
 - `fraude_investissement` 💰 - Arnaques investissement
