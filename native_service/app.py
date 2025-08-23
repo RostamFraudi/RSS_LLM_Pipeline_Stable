@@ -31,7 +31,7 @@ llama_client = LlamaClient(config.get('llama_config', {}))
 
 @app.route('/generate_metadata', methods=['POST'])
 def generate_metadata():
-    """Endpoint principal - Classification + métadonnées complètes"""
+    """Endpoint principal - Classification + métadonnées avec hashtags Obsidian"""
     try:
         data = request.json
         title = data.get('title', '')
@@ -50,10 +50,10 @@ def generate_metadata():
         # 2. Informations du domaine
         domain_info = domains_config.get(domain, {})
         
-        # 3. Génération tags et alertes (logique simplifiée)
+        # 3. Génération tags et alertes (logique améliorée)
         alert_level = determine_alert_level(title, content, domain)
-        tags = generate_tags(title, content, domain)
-        concepts = extract_concepts(title, content, domain)
+        tags = generate_tags_with_hashtags(title, content, domain)  # 🔧 NOUVELLE FONCTION
+        concepts = extract_concepts_with_hashtags(title, content, domain)  # 🔧 NOUVELLE FONCTION
         
         total_time = time.time() - start_time
         
@@ -64,20 +64,107 @@ def generate_metadata():
             "confidence": classification['confidence'],
             "classification_method": classification['method'],
             "alert_level": alert_level,
-            "tags": tags,
-            "obsidian_concepts": concepts,
+            "tags": tags,  # 🏷️ AVEC HASHTAGS
+            "obsidian_concepts": concepts,  # 🏷️ AVEC HASHTAGS
+            "obsidian_tags": generate_obsidian_tags(domain, alert_level, tags),  # 🔧 NOUVEAU
             "output_folder": domain_info.get('output_folder', domain),
             "processing_time": total_time,
             "llm_used": classification['method'].startswith('llama'),
-            "version": "3.0_native_llama"
+            "version": "3.1_native_llama_enhanced"
         }
         
-        logger.info(f"✅ Classification: {domain} ({classification['confidence']}%)")
+        logger.info(f"✅ Classification: {domain} ({classification['confidence']}%) avec hashtags")
         return jsonify(result)
         
     except Exception as e:
         logger.error(f"Erreur generate_metadata: {e}")
         return jsonify({"error": str(e)}), 500
+
+def generate_tags_with_hashtags(title: str, content: str, domain: str) -> list:
+    """Génère des tags avec hashtags Obsidian"""
+    tags = []
+    
+    # Tag principal du domaine
+    domain_tag = f"#{domain.replace('_', '-')}"
+    tags.append(domain_tag)
+    
+    text = (title + " " + content).lower()
+    
+    # Tags contextuels avec hashtags
+    tag_mapping = {
+        'urgent': '#alerte-urgente',
+        'critical': '#critique', 
+        'breach': '#fuite-donnees',
+        'attack': '#cyberattaque',
+        'fraud': '#fraude-confirmee',
+        'scam': '#arnaque',
+        'malware': '#malware',
+        'phishing': '#hameconnage',
+        'ransomware': '#rançongiciel',
+        'apt': '#menace-persistante',
+        'zero-day': '#zero-day',
+        'vulnerability': '#vulnerabilite'
+    }
+    
+    for keyword, hashtag in tag_mapping.items():
+        if keyword in text:
+            tags.append(hashtag)
+    
+    # Tags géographiques
+    geo_mapping = {
+        'france': '#france',
+        'europe': '#europe', 
+        'usa': '#etats-unis',
+        'china': '#chine',
+        'russia': '#russie',
+        'ukraine': '#ukraine'
+    }
+    
+    for geo, hashtag in geo_mapping.items():
+        if geo in text:
+            tags.append(hashtag)
+            
+    return list(set(tags))  # Supprimer doublons
+
+def extract_concepts_with_hashtags(title: str, content: str, domain: str) -> list:
+    """Extrait des concepts Obsidian avec liens"""
+    concepts = []
+    
+    # Concepts de base par domaine avec hashtags
+    domain_concepts = {
+        'fraude_investissement': ['#Fraude-Financière', '#Protection-Investisseurs', '#AMF', '#Ponzi-Scheme'],
+        'fraude_paiement': ['#Sécurité-Bancaire', '#Moyens-de-Paiement', '#PCI-DSS', '#Card-Skimming'],
+        'cyber_investigations': ['#Cybersécurité', '#Investigation-Numérique', '#Forensic', '#CERT'],
+        'fraude_crypto': ['#Cryptomonnaies', '#Blockchain-Security', '#DeFi-Risks', '#Rug-Pull'],
+        'supply_chain_cyber': ['#Supply-Chain', '#Third-Party-Risk', '#Vendor-Security'],
+        'fraude_president_cyber': ['#FOVI', '#CEO-Fraud', '#Business-Email-Compromise', '#Social-Engineering'],
+        'fraude_ecommerce': ['#E-commerce-Security', '#Online-Fraud', '#Payment-Security']
+    }
+    
+    base_concepts = domain_concepts.get(domain, ['#Cybersécurité', '#Veille-Technologique'])
+    concepts.extend(base_concepts)
+    
+    # Extraction d'entités avec hashtags
+    text = (title + " " + content).lower()
+    
+    # Organisations/Entreprises
+    orgs = ['microsoft', 'google', 'apple', 'amazon', 'paypal', 'visa', 'mastercard']
+    for org in orgs:
+        if org in text:
+            concepts.append(f"#{org.title()}")
+    
+    # Technologies
+    tech = ['windows', 'linux', 'android', 'ios', 'chrome', 'firefox', 'outlook']
+    for tech_item in tech:
+        if tech_item in text:
+            concepts.append(f"#{tech_item.title()}")
+            
+    return list(set(concepts))
+
+def generate_obsidian_tags(domain: str, alert_level: str, tags: list) -> str:
+    """Génère une chaîne de tags Obsidian formatée"""
+    all_tags = [f"#{domain.replace('_', '-')}", f"#{alert_level}"] + tags
+    return ' '.join(list(set(all_tags)))  # Supprimer doublons
 
 @app.route('/summarize', methods=['POST'])
 def summarize():
