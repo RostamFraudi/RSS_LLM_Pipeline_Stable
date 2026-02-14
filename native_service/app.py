@@ -1,6 +1,6 @@
 """
-RSS LLM Service Native v3.0
-Optimisé avec llama.cpp local
+RSS LLM Service Native v3.2
+Optimisé avec llama.cpp local - VERSION ASYNC PRODUCTION
 """
 
 from flask import Flask, request, jsonify
@@ -9,51 +9,69 @@ import time
 import logging
 from pathlib import Path
 from llama_client import LlamaClient
+import asyncio
 
 # Configuration logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Chargement configuration
-def load_config():
-    config_path = Path("../config/sources.json")
+# Détermination des chemins absolus pour plus de robustesse
+BASE_DIR = Path(__file__).resolve().parent.parent
+CONFIG_DIR = BASE_DIR / "config"
+
+def load_json_config(filename: str):
+    """Charge un fichier JSON depuis le dossier config"""
+    path = CONFIG_DIR / filename
     try:
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
     except Exception as e:
-        logger.error(f"Erreur chargement config: {e}")
+        logger.error(f"Erreur chargement {filename}: {e}")
         return {}
 
-config = load_config()
-llama_client = LlamaClient(config.get('llama_config', {}))
+# Chargement initial des configurations
+config = load_json_config("sources.json")
+prompts = load_json_config("prompts.json")
+
+# Initialisation du client LLM
+llama_client = LlamaClient(config.get('llama_config', {}), prompts=prompts)
 
 @app.route('/generate_metadata', methods=['POST'])
-def generate_metadata():
+async def generate_metadata():
     """Endpoint principal - Classification + métadonnées avec hashtags Obsidian"""
     try:
         data = request.json
+        if not data:
+            return jsonify({"error": "Données JSON manquantes"}), 400
+
         title = data.get('title', '')
         content = data.get('content', '')
         source = data.get('source', '')
         
+        if not title:
+            return jsonify({"error": "Le titre est requis"}), 400
+
         start_time = time.time()
         
-        # 1. Classification avec llama.cpp
+        # 1. Classification avec llama.cpp (Asynchrone)
         domains_config = config.get('domains', {})
         available_domains = list(domains_config.keys())
         
-        classification = llama_client.classify_domain(title, content, available_domains)
+        classification = await llama_client.classify_domain(title, content, available_domains)
         domain = classification['domain']
         
         # 2. Informations du domaine
         domain_info = domains_config.get(domain, {})
         
-        # 3. Génération tags et alertes (logique améliorée)
+        # 3. Génération tags et alertes
         alert_level = determine_alert_level(title, content, domain)
-        tags = generate_tags_with_hashtags(title, content, domain)  # 🔧 NOUVELLE FONCTION
-        concepts = extract_concepts_with_hashtags(title, content, domain)  # 🔧 NOUVELLE FONCTION
+        tags = generate_tags_with_hashtags(title, content, domain)
+        concepts = extract_concepts_with_hashtags(title, content, domain)
         
         total_time = time.time() - start_time
         
@@ -64,33 +82,98 @@ def generate_metadata():
             "confidence": classification['confidence'],
             "classification_method": classification['method'],
             "alert_level": alert_level,
-            "tags": tags,  # 🏷️ AVEC HASHTAGS
-            "obsidian_concepts": concepts,  # 🏷️ AVEC HASHTAGS
-            "obsidian_tags": generate_obsidian_tags(domain, alert_level, tags),  # 🔧 NOUVEAU
+            "tags": tags,
+            "obsidian_concepts": concepts,
+            "obsidian_tags": generate_obsidian_tags(domain, alert_level, tags),
             "output_folder": domain_info.get('output_folder', domain),
             "processing_time": total_time,
             "llm_used": classification['method'].startswith('llama'),
-            "version": "3.1_native_llama_enhanced"
+            "version": "3.2_native_async"
         }
         
-        logger.info(f"✅ Classification: {domain} ({classification['confidence']}%) avec hashtags")
+        logger.info(f"✅ Classification réussie: {domain} ({classification['confidence']}%)")
         return jsonify(result)
         
     except Exception as e:
-        logger.error(f"Erreur generate_metadata: {e}")
-        return jsonify({"error": str(e)}), 500
+        logger.exception(f"Erreur dans generate_metadata: {e}")
+        return jsonify({"error": "Erreur interne du serveur", "details": str(e)}), 500
+
+@app.route('/summarize', methods=['POST'])
+async def summarize():
+    """Génération de résumé avec llama.cpp (Asynchrone)"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"error": "Données JSON manquantes"}), 400
+
+        title = data.get('title', '')
+        content = data.get('content', '')
+        domain = data.get('domain', 'cyber_investigations')
+
+        if not title or not content:
+            return jsonify({"error": "Le titre et le contenu sont requis"}), 400
+
+        summary_result = await llama_client.generate_summary(title, content, domain)
+
+        return jsonify({
+            "summary": summary_result['summary'],
+            "domain": domain,
+            "processing_time": summary_result['processing_time'],
+            "method": summary_result['method'],
+            "version": "3.2_native_async"
+        })
+
+    except Exception as e:
+        logger.exception(f"Erreur dans summarize: {e}")
+        return jsonify({"error": "Erreur interne du serveur", "details": str(e)}), 500
+
+@app.route('/health', methods=['GET'])
+async def health():
+    """Health check détaillé avec status des serveurs llama.cpp"""
+    try:
+        llama_status = await llama_client.health_check()
+
+        return jsonify({
+            "status": "ok",
+            "service": "RSS LLM Service v3.2 Native Async",
+            "llama_servers": llama_status,
+            "config_paths": {
+                "base": str(BASE_DIR),
+                "config": str(CONFIG_DIR)
+            },
+            "version": "3.2_native_async"
+        })
+
+    except Exception as e:
+        logger.error(f"Health check a échoué: {e}")
+        return jsonify({"status": "error", "error": str(e)}), 500
+
+# --- Fonctions utilitaires ---
+
+def determine_alert_level(title: str, content: str, domain: str) -> str:
+    """Détermine le niveau d'alerte basé sur des mots-clés"""
+    text = (title + " " + content).lower()
+
+    critical_keywords = ['breach', 'attack', 'urgent', 'critical', 'exploit', '0-day', 'zero-day', 'fuite']
+    watch_keywords = ['warning', 'risk', 'threat', 'vulnerability', 'menace', 'risque', 'vulnerabilité']
+
+    if any(word in text for word in critical_keywords):
+        return 'urgent'
+    elif any(word in text for word in watch_keywords):
+        return 'watch'
+    else:
+        return 'info'
 
 def generate_tags_with_hashtags(title: str, content: str, domain: str) -> list:
-    """Génère des tags avec hashtags Obsidian"""
+    """Génère des tags avec hashtags formatés pour Obsidian"""
     tags = []
     
-    # Tag principal du domaine
-    domain_tag = f"#{domain.replace('_', '-')}"
-    tags.append(domain_tag)
+    # Tag de domaine
+    tags.append(f"#{domain.replace('_', '-')}")
     
     text = (title + " " + content).lower()
     
-    # Tags contextuels avec hashtags
+    # Mapping mots-clés -> hashtags
     tag_mapping = {
         'urgent': '#alerte-urgente',
         'critical': '#critique', 
@@ -116,7 +199,7 @@ def generate_tags_with_hashtags(title: str, content: str, domain: str) -> list:
         'europe': '#europe', 
         'usa': '#etats-unis',
         'china': '#chine',
-        'russia': '#russie',
+        'russie': '#russie',
         'ukraine': '#ukraine'
     }
     
@@ -124,16 +207,15 @@ def generate_tags_with_hashtags(title: str, content: str, domain: str) -> list:
         if geo in text:
             tags.append(hashtag)
             
-    return list(set(tags))  # Supprimer doublons
+    return sorted(list(set(tags)))
 
 def extract_concepts_with_hashtags(title: str, content: str, domain: str) -> list:
-    """Extrait des concepts Obsidian avec liens"""
+    """Extrait des concepts clés avec hashtags"""
     concepts = []
     
-    # Concepts de base par domaine avec hashtags
     domain_concepts = {
-        'fraude_investissement': ['#Fraude-Financière', '#Protection-Investisseurs', '#AMF', '#Ponzi-Scheme'],
-        'fraude_paiement': ['#Sécurité-Bancaire', '#Moyens-de-Paiement', '#PCI-DSS', '#Card-Skimming'],
+        'fraude_investissement': ['#Fraude-Financière', '#Protection-Investisseurs', '#AMF', '#Ponzi'],
+        'fraude_paiement': ['#Sécurité-Bancaire', '#Moyens-de-Paiement', '#PCI-DSS', '#Skimming'],
         'cyber_investigations': ['#Cybersécurité', '#Investigation-Numérique', '#Forensic', '#CERT'],
         'fraude_crypto': ['#Cryptomonnaies', '#Blockchain-Security', '#DeFi-Risks', '#Rug-Pull'],
         'supply_chain_cyber': ['#Supply-Chain', '#Third-Party-Risk', '#Vendor-Security'],
@@ -144,105 +226,28 @@ def extract_concepts_with_hashtags(title: str, content: str, domain: str) -> lis
     base_concepts = domain_concepts.get(domain, ['#Cybersécurité', '#Veille-Technologique'])
     concepts.extend(base_concepts)
     
-    # Extraction d'entités avec hashtags
     text = (title + " " + content).lower()
     
-    # Organisations/Entreprises
-    orgs = ['microsoft', 'google', 'apple', 'amazon', 'paypal', 'visa', 'mastercard']
-    for org in orgs:
-        if org in text:
-            concepts.append(f"#{org.title()}")
-    
-    # Technologies
-    tech = ['windows', 'linux', 'android', 'ios', 'chrome', 'firefox', 'outlook']
-    for tech_item in tech:
-        if tech_item in text:
-            concepts.append(f"#{tech_item.title()}")
-            
-    return list(set(concepts))
-
-def generate_obsidian_tags(domain: str, alert_level: str, tags: list) -> str:
-    """Génère une chaîne de tags Obsidian formatée"""
-    all_tags = [f"#{domain.replace('_', '-')}", f"#{alert_level}"] + tags
-    return ' '.join(list(set(all_tags)))  # Supprimer doublons
-
-@app.route('/summarize', methods=['POST'])
-def summarize():
-    """Génération de résumé avec llama.cpp"""
-    try:
-        data = request.json
-        title = data.get('title', '')
-        content = data.get('content', '')
-        domain = data.get('domain', 'cyber_investigations')
-        
-        summary_result = llama_client.generate_summary(title, content, domain)
-        
-        return jsonify({
-            "summary": summary_result['summary'],
-            "domain": domain,
-            "processing_time": summary_result['processing_time'],
-            "method": summary_result['method'],
-            "version": "3.0_native"
-        })
-        
-    except Exception as e:
-        logger.error(f"Erreur summarize: {e}")
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/health', methods=['GET'])
-def health():
-    """Health check avec status llama.cpp"""
-    try:
-        llama_status = llama_client.health_check()
-        
-        return jsonify({
-            "status": "ok",
-            "service": "RSS LLM Service v3.0 Native", 
-            "llama_servers": llama_status,
-            "models": {
-                "classification": "tinyllama-1.1b-q4.gguf",
-                "summary": "qwen2-0.5b-q4.gguf"
-            },
-            "version": "3.0_native_llama"
-        })
-        
-    except Exception as e:
-        return jsonify({"status": "error", "error": str(e)}), 500
-
-def determine_alert_level(title: str, content: str, domain: str) -> str:
-    """Détermine le niveau d'alerte"""
-    text = (title + " " + content).lower()
-    
-    if any(word in text for word in ['breach', 'attack', 'urgent', 'critical']):
-        return 'urgent'
-    elif any(word in text for word in ['warning', 'risk', 'threat']):
-        return 'watch'
-    else:
-        return 'info'
-
-def generate_tags(title: str, content: str, domain: str) -> list:
-    """Génère des tags basiques"""
-    tags = [domain.replace('_', '-')]
-    
-    text = (title + " " + content).lower()
-    if 'urgent' in text or 'critical' in text:
-        tags.append('urgent')
-    if 'fraud' in text or 'fraude' in text:
-        tags.append('fraud-alert')
-        
-    return tags
-
-def extract_concepts(title: str, content: str, domain: str) -> list:
-    """Extrait des concepts Obsidian"""
-    domain_concepts = {
-        'fraude_investissement': ['Fraude Financière', 'Protection Investisseurs'],
-        'fraude_paiement': ['Sécurité Bancaire', 'Moyens de Paiement'],
-        'cyber_investigations': ['Cybersécurité', 'Investigation Numérique'],
-        'fraude_crypto': ['Cryptomonnaies', 'Blockchain Security']
+    # Organisations et technos courantes
+    entities = {
+        'microsoft': '#Microsoft', 'google': '#Google', 'apple': '#Apple',
+        'amazon': '#Amazon', 'paypal': '#PayPal', 'visa': '#Visa',
+        'mastercard': '#MasterCard', 'windows': '#Windows', 'linux': '#Linux',
+        'android': '#Android', 'ios': '#iOS', 'outlook': '#Outlook'
     }
     
-    return domain_concepts.get(domain, ['Cybersécurité', 'Veille Technologique'])
+    for key, hashtag in entities.items():
+        if key in text:
+            concepts.append(hashtag)
+            
+    return sorted(list(set(concepts)))
+
+def generate_obsidian_tags(domain: str, alert_level: str, tags: list) -> str:
+    """Formate la ligne de tags pour le haut du fichier Obsidian"""
+    all_tags = [f"#{domain.replace('_', '-')}", f"#{alert_level}"] + tags
+    return ' '.join(sorted(list(set(all_tags))))
 
 if __name__ == '__main__':
-    logger.info("🚀 Démarrage RSS LLM Service Native v3.0")
+    logger.info("🚀 Démarrage RSS LLM Service Native v3.2 (Mode Développement)")
+    # En production, utilisez gunicorn ou un serveur ASGI
     app.run(host='0.0.0.0', port=15000, debug=False)

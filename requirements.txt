@@ -1,7 +1,12 @@
-# RSS LLM Pipeline Native - Dépendances principales
-flask==2.3.3
-requests==2.31.0
+# RSS LLM Pipeline Native - Dépendances optimisées
+flask[async]==3.1.2
+httpx==0.28.1
+gunicorn==25.1.0
+uvicorn==0.40.0
 python-dateutil==2.8.2
+feedparser==6.0.10
+python-dotenv==1.0.0
+asgiref==3.11.1
 pyyaml==6.0.1
 
 # Développement et tests

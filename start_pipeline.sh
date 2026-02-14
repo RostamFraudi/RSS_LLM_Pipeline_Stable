@@ -123,12 +123,12 @@ else
     echo "❌ Qwen2 non accessible"
 fi
 
-# 3. Service API Python (optionnel)
+# 3. Service API Python (Production avec Gunicorn)
 if [ -f "native_service/app.py" ]; then
     echo ""
-    echo "🐍 Démarrage service API Python..."
+    echo "🐍 Démarrage service API Python (Gunicorn)..."
     cd native_service
-    python app.py &
+    gunicorn --workers 2 --threads 4 --timeout 120 --bind 0.0.0.0:15000 app:app &
     API_PID=$!
     cd ..
 
