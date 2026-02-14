@@ -1,101 +1,104 @@
 """
 Client léger pour serveurs llama.cpp
-Optimisé pour RSS + LLM Pipeline Native - VERSION COMPLÈTE
+Optimisé pour RSS + LLM Pipeline Native - VERSION ASYNC AMÉLIORÉE
 """
 
-import requests
+import httpx
 import json
 import logging
 import time
 from typing import Dict, Optional, List
+import asyncio
 
 logger = logging.getLogger(__name__)
 
 class LlamaClient:
-    """Client pour serveurs llama.cpp multiples"""
+    """Client pour serveurs llama.cpp multiples (Version Asynchrone)"""
     
-    def __init__(self, config: Dict):
+    def __init__(self, config: Dict, prompts: Dict = None):
         self.classification_config = config.get('classification_server', {})
         self.summary_config = config.get('summary_server', {})
-        self.timeout = 30
+        self.timeout = httpx.Timeout(30.0, connect=5.0)
         
         # URLs des serveurs
         self.classification_url = self.classification_config.get('url', 'http://localhost:8080')
         self.summary_url = self.summary_config.get('url', 'http://localhost:8081')
         
+        # Prompts
+        self.prompts = prompts or {}
+
         logger.info(f"🦙 LlamaClient initialisé")
         logger.info(f"   Classification: {self.classification_url}")
         logger.info(f"   Summary: {self.summary_url}")
-    
-    def classify_domain(self, title: str, content: str, domains: List[str]) -> Dict:
-        """Classification avec TinyLlama"""
+
+    async def _post_completion(self, url: str, payload: Dict) -> Optional[Dict]:
+        """Effectue un appel POST asynchrone au serveur llama.cpp"""
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            try:
+                response = await client.post(f"{url}/completion", json=payload)
+                response.raise_for_status()
+                return response.json()
+            except Exception as e:
+                logger.error(f"Erreur d'appel LLM à {url}: {e}")
+                return None
+
+    async def classify_domain(self, title: str, content: str, domains: List[str]) -> Dict:
+        """Classification avec TinyLlama (Asynchrone)"""
         start_time = time.time()
         
-        # Construction du prompt avec domaines dynamiques
-        domains_desc = "\n".join([f"- {domain}" for domain in domains])
-        prompt = f"""Classify this article into ONE category:
+        # Construction du prompt
+        template = self.prompts.get('classification', {}).get('base_prompt')
+        if template:
+            # Assurer que les variables attendues sont présentes
+            try:
+                prompt = template.format(title=title, content=content[:500])
+            except KeyError:
+                # Si le template attend d'autres variables non fournies
+                prompt = f"Classify this article into ONE category:\n{', '.join(domains)}\n\nTitle: {title}\nContent: {content[:500]}\n\nCategory:"
+        else:
+            domains_desc = "\n".join([f"- {domain}" for domain in domains])
+            prompt = f"Classify this article into ONE category:\n\n{domains_desc}\n\nTitle: {title}\nContent: {content[:500]}\n\nCategory:"
 
-{domains_desc}
+        logger.info(f"🔍 CLASSIFICATION: {title[:50]}...")
 
-Title: {title}
-Content: {content[:500]}
+        payload = {
+            "prompt": prompt,
+            "max_tokens": self.classification_config.get('max_tokens', 20),
+            "temperature": self.classification_config.get('temperature', 0.1),
+            "stop": ["\n", ".", ":", ","]
+        }
 
-Category:"""
-        
-        try:
-            logger.warning(f"🔍 CLASSIFICATION: {title[:50]}...")
+        result = await self._post_completion(self.classification_url, payload)
+
+        if result:
+            raw_classification = result.get("content", "").strip()
+            logger.debug(f"📝 RÉPONSE BRUTE: '{raw_classification}'")
             
-            response = requests.post(
-                f"{self.classification_url}/completion",
-                json={
-                    "prompt": prompt,
-                    "max_tokens": self.classification_config.get('max_tokens', 20),
-                    "temperature": self.classification_config.get('temperature', 0.1),
-                    "stop": ["\n", ".", ":", ","]
-                },
-                timeout=self.timeout
-            )
+            domain = self._parse_classification(raw_classification, domains)
+            confidence = self._calculate_confidence(raw_classification, domain)
             
-            if response.status_code == 200:
-                result = response.json()
-                raw_classification = result.get("content", "").strip()
-                
-                logger.warning(f"📝 RÉPONSE BRUTE: '{raw_classification}'")
-                
-                # Parse la classification
-                domain = self._parse_classification(raw_classification, domains)
-                confidence = self._calculate_confidence(raw_classification, domain)
-                
-                processing_time = time.time() - start_time
-                
-                logger.warning(f"✅ CLASSIFICATION: {domain} ({confidence}%)")
-                
-                return {
-                    "domain": domain,
-                    "confidence": confidence,
-                    "method": "llama_cpp_tinyllama",
-                    "processing_time": processing_time,
-                    "raw_output": raw_classification
-                }
-            else:
-                logger.error(f"Classification API error: {response.status_code}")
-                return self._fallback_classification(title, content, domains)
-                
-        except Exception as e:
-            logger.error(f"Classification failed: {e}")
-            return self._fallback_classification(title, content, domains)
-    
-    def generate_summary(self, title: str, content: str, domain: str) -> Dict:
-        """Résumé avec Qwen2"""
+            processing_time = time.time() - start_time
+            logger.info(f"✅ CLASSIFICATION: {domain} ({confidence}%) en {processing_time:.2f}s")
+
+            return {
+                "domain": domain,
+                "confidence": confidence,
+                "method": "llama_cpp_tinyllama",
+                "processing_time": processing_time,
+                "raw_output": raw_classification
+            }
+
+        return await self._fallback_classification(title, content, domains)
+
+    async def generate_summary(self, title: str, content: str, domain: str) -> Dict:
+        """Résumé avec Qwen2 (Asynchrone)"""
         start_time = time.time()
         
-        # 🔧 CORRECTION : Gérer domaine "autre" ou vide
         if not domain or domain == "autre":
             domain = "cyber_investigations"
-            logger.warning(f"🔧 DOMAINE CORRIGÉ: {domain}")
         
         # Mapping français pour domaines
-        domain_french = {
+        domain_french_map = {
             'fraude_investissement': 'fraude aux investissements',
             'fraude_paiement': 'fraude aux moyens de paiement', 
             'fraude_president_cyber': 'fraude au président (FOVI)',
@@ -104,113 +107,94 @@ Category:"""
             'intelligence_economique': 'intelligence économique',
             'fraude_crypto': 'fraude cryptomonnaies',
             'cyber_investigations': 'investigations cybercriminalité'
-        }.get(domain, 'cybersécurité')
+        }
+        domain_french = domain_french_map.get(domain, 'cybersécurité')
         
-        prompt = f"""Vous êtes un analyste cybersécurité francophone expert.
+        template = self.prompts.get('summary', {}).get('base_prompt')
+        if template:
+            try:
+                prompt = template.format(domain=domain_french, title=title, content=content[:800])
+            except KeyError:
+                prompt = f"Summarize this {domain_french} article in French:\n\nTitle: {title}\nContent: {content[:800]}\n\nSummary:"
+        else:
+            prompt = f"Vous êtes un analyste cybersécurité francophone expert.\n\nMISSION : Analysez cet article sur {domain_french} et créez un résumé structuré.\n\nARTICLE :\nTitre : {title}\nContenu : {content[:800]}\n\nFORMAT OBLIGATOIRE :\n🎯 **Fait principal** : [1 phrase]\n🔍 **Impact** : [1 phrase]\n⚠️ **Recommandation** : [1 phrase]\n\nVOTRE RÉSUMÉ STRUCTURÉ :"
 
-MISSION : Analysez cet article sur {domain_french} et créez un résumé structuré.
+        logger.info(f"📝 RÉSUMÉ: {domain} - {title[:50]}...")
 
-ARTICLE :
-Titre : {title}
-Contenu : {content[:800]}
+        payload = {
+            "prompt": prompt,
+            "max_tokens": self.summary_config.get('max_tokens', 200),
+            "temperature": self.summary_config.get('temperature', 0.3),
+            "stop": ["ARTICLE", "MISSION", "FORMAT", "\n\n\n"]
+        }
 
-FORMAT OBLIGATOIRE (respectez exactement) :
-🎯 **Fait principal** : [1 phrase sur l'événement clé]
-🔍 **Impact** : [1 phrase sur les conséquences/victimes]
-⚠️ **Recommandation** : [1 phrase d'action/prévention]
+        result = await self._post_completion(self.summary_url, payload)
 
-VOTRE RÉSUMÉ STRUCTURÉ :"""
-
-        try:
-            logger.warning(f"📝 RÉSUMÉ: {domain} - {title[:50]}...")
+        if result:
+            summary = result.get("content", "").strip()
+            summary = self._clean_summary(summary)
             
-            response = requests.post(
-                f"{self.summary_url}/completion",
-                json={
-                    "prompt": prompt,
-                    "max_tokens": self.summary_config.get('max_tokens', 200),
-                    "temperature": self.summary_config.get('temperature', 0.3),
-                    "stop": ["ARTICLE", "MISSION", "FORMAT", "\n\n\n"]
-                },
-                timeout=self.timeout
-            )
+            processing_time = time.time() - start_time
+            logger.info(f"✅ RÉSUMÉ OK: {processing_time:.2f}s")
             
-            if response.status_code == 200:
-                result = response.json()
-                summary = result.get("content", "").strip()
-                
-                logger.warning(f"📋 RÉSUMÉ BRUT: '{summary[:100]}...'")
-                
-                # Nettoyage du résumé
-                summary = self._clean_summary(summary)
-                
-                processing_time = time.time() - start_time
-                
-                logger.warning(f"✅ RÉSUMÉ OK: {processing_time:.2f}s")
-                
-                return {
-                    "summary": summary,
-                    "method": "llama_cpp_qwen2_structured",
-                    "processing_time": processing_time
-                }
-            else:
-                logger.error(f"Summary API error: {response.status_code}")
-                return self._fallback_summary(title, content, domain)
-                
-        except Exception as e:
-            logger.error(f"Summary failed: {e}")
-            return self._fallback_summary(title, content, domain)
-    
-    def health_check(self) -> Dict:
-        """Vérification santé des serveurs - MÉTHODE MANQUANTE"""
+            return {
+                "summary": summary,
+                "method": "llama_cpp_qwen2_structured",
+                "processing_time": processing_time
+            }
+
+        return await self._fallback_summary(title, content, domain)
+
+    async def health_check(self) -> Dict:
+        """Vérification santé détaillée des serveurs"""
         status = {
-            "classification": False,
-            "summary": False,
+            "classification": {"status": "down", "url": self.classification_url},
+            "summary": {"status": "down", "url": self.summary_url},
             "timestamp": time.time()
         }
         
-        # Test classification server
-        try:
-            response = requests.get(f"{self.classification_url}/health", timeout=5)
-            status["classification"] = response.status_code == 200
-        except:
-            pass
-            
-        # Test summary server  
-        try:
-            response = requests.get(f"{self.summary_url}/health", timeout=5)
-            status["summary"] = response.status_code == 200
-        except:
-            pass
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            # Test classification server
+            try:
+                response = await client.get(f"{self.classification_url}/health")
+                if response.status_code == 200:
+                    status["classification"]["status"] = "ok"
+                    status["classification"]["details"] = response.json()
+            except Exception as e:
+                status["classification"]["error"] = str(e)
+
+            # Test summary server
+            try:
+                response = await client.get(f"{self.summary_url}/health")
+                if response.status_code == 200:
+                    status["summary"]["status"] = "ok"
+                    status["summary"]["details"] = response.json()
+            except Exception as e:
+                status["summary"]["error"] = str(e)
             
         return status
     
     def _parse_classification(self, raw_output: str, valid_domains: List[str]) -> str:
-        """Parse et valide la classification - MÉTHODE MANQUANTE"""
+        """Parse et valide la classification avec plus de robustesse"""
         raw_output = raw_output.lower().strip()
         
-        logger.warning(f"🔍 PARSING: '{raw_output}'")
-        
-        # Chercher correspondance exacte d'abord
+        # Match exact
         for domain in valid_domains:
             if domain.lower() == raw_output:
-                logger.warning(f"✅ MATCH EXACT: {domain}")
                 return domain
         
-        # Chercher correspondance partielle
+        # Match contenu
         for domain in valid_domains:
             if domain.lower() in raw_output:
-                logger.warning(f"✅ MATCH PARTIEL: {domain}")
                 return domain
                 
-        # Chercher par parties de domaine
+        # Match par parties (mots significatifs)
         for domain in valid_domains:
-            domain_parts = domain.split('_')
-            if any(part in raw_output for part in domain_parts):
-                logger.warning(f"✅ MATCH PARTIE: {domain}")
+            parts = [p for p in domain.split('_') if len(p) > 3]
+            if any(part in raw_output for part in parts):
                 return domain
         
-        # Fallback par mots-clés
+        # Mots-clés universels
         keyword_mapping = {
             "investissement": "fraude_investissement",
             "investment": "fraude_investissement", 
@@ -232,25 +216,26 @@ VOTRE RÉSUMÉ STRUCTURÉ :"""
         
         for keyword, domain in keyword_mapping.items():
             if keyword in raw_output:
-                logger.warning(f"✅ MATCH KEYWORD: {keyword} → {domain}")
                 return domain
         
-        # Fallback final
-        logger.warning(f"❌ FALLBACK: cyber_investigations")
         return "cyber_investigations"
     
     def _calculate_confidence(self, raw_output: str, domain: str) -> int:
-        """Calcule la confiance de la classification - MÉTHODE MANQUANTE"""
-        if domain.lower() in raw_output.lower():
+        """Calcule un score de confiance basé sur la qualité du match"""
+        raw_output = raw_output.lower()
+        domain_lower = domain.lower()
+
+        if domain_lower == raw_output:
+            return 95
+        elif domain_lower in raw_output:
             return 85
-        elif any(part in raw_output.lower() for part in domain.split('_')):
+        elif any(part in raw_output for part in domain_lower.split('_') if len(part) > 3):
             return 70
         else:
             return 50
     
     def _clean_summary(self, summary: str) -> str:
-        """Nettoie le résumé généré - MÉTHODE MANQUANTE"""
-        # Supprimer préfixes courants
+        """Nettoie et structure le résumé si nécessaire"""
         prefixes = ["votre résumé structuré:", "résumé:", "summary:", "tldr:", "voici"]
         summary_lower = summary.lower()
         
@@ -259,23 +244,21 @@ VOTRE RÉSUMÉ STRUCTURÉ :"""
                 summary = summary[len(prefix):].strip()
                 break
         
-        # Assurer que les emojis sont présents
+        # Vérification des emojis de structure
         required_elements = ["🎯", "🔍", "⚠️"]
         if not all(emoji in summary for emoji in required_elements):
-            # Fallback : convertir en format structuré
-            lines = summary.split('.')[:3]  # Prendre 3 premières phrases
+            # Transformation en format structuré si manquant
+            lines = [l.strip() for l in summary.split('.') if l.strip()]
             if len(lines) >= 1:
-                summary = f"🎯 **Fait principal** : {lines[0].strip()}.\n🔍 **Impact** : {lines[1].strip() if len(lines) > 1 else 'Impact à déterminer'}.\n⚠️ **Recommandation** : {lines[2].strip() if len(lines) > 2 else 'Surveillance recommandée'}."
+                summary = f"🎯 **Fait principal** : {lines[0]}.\n🔍 **Impact** : {lines[1] if len(lines) > 1 else 'Impact à déterminer'}.\n⚠️ **Recommandation** : {lines[2] if len(lines) > 2 else 'Surveillance proactive recommandée'}."
         
         return summary
     
-    def _fallback_classification(self, title: str, content: str, domains: List[str]) -> Dict:
-        """Classification fallback par mots-clés - MÉTHODE MANQUANTE"""
+    async def _fallback_classification(self, title: str, content: str, domains: List[str]) -> Dict:
+        """Classification de repli par recherche de mots-clés"""
         text = (title + " " + content).lower()
+        logger.warning(f"🔄 FALLBACK CLASSIFICATION utilisé pour: {title[:50]}")
         
-        logger.warning(f"🔄 FALLBACK CLASSIFICATION")
-        
-        # Mots-clés par domaine
         keywords = {
             "fraude_investissement": ["investissement", "placement", "arnaque", "ponzi", "escroquerie"],
             "fraude_paiement": ["paiement", "carte", "bancaire", "virement", "phishing"],
@@ -292,16 +275,9 @@ VOTRE RÉSUMÉ STRUCTURÉ :"""
             domain_keywords = keywords.get(domain, [])
             score = sum(1 for kw in domain_keywords if kw in text)
             scores[domain] = score
-            logger.warning(f"   {domain}: {score} matches")
             
-        if scores:
-            best_domain = max(scores, key=scores.get)
-            confidence = min(80, max(40, scores.get(best_domain, 0) * 15))
-        else:
-            best_domain = "cyber_investigations"
-            confidence = 40
-        
-        logger.warning(f"✅ FALLBACK RESULT: {best_domain} ({confidence}%)")
+        best_domain = max(scores, key=scores.get) if scores and max(scores.values()) > 0 else "cyber_investigations"
+        confidence = min(80, max(40, scores.get(best_domain, 0) * 15))
         
         return {
             "domain": best_domain,
@@ -310,13 +286,10 @@ VOTRE RÉSUMÉ STRUCTURÉ :"""
             "processing_time": 0.05
         }
     
-    def _fallback_summary(self, title: str, content: str, domain: str) -> Dict:
-        """Résumé fallback par template - MÉTHODE MANQUANTE"""
-        summary = f"""🎯 **Fait principal** : Article sur {domain.replace('_', ' ')} intitulé "{title[:80]}...".
-🔍 **Impact** : Situation nécessitant une analyse approfondie des implications sécuritaires.
-⚠️ **Recommandation** : Suivi de l'évolution et mise en place de mesures préventives adaptées."""
-        
-        logger.warning(f"🔄 FALLBACK SUMMARY")
+    async def _fallback_summary(self, title: str, content: str, domain: str) -> Dict:
+        """Résumé de repli par gabarit"""
+        logger.warning(f"🔄 FALLBACK SUMMARY utilisé pour: {title[:50]}")
+        summary = f"🎯 **Fait principal** : Article sur {domain.replace('_', ' ')} intitulé \"{title}\".\n🔍 **Impact** : Analyse des risques cyber associée à cette publication dans le domaine {domain}.\n⚠️ **Recommandation** : Rester vigilant et suivre l'évolution de cette menace via les canaux officiels."
         
         return {
             "summary": summary,
