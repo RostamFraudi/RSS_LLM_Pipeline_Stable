@@ -1,10 +1,10 @@
 #!/bin/bash
 # RSS LLM Pipeline Native - Installation Automatique
-# Version: 3.3 - ASYNC + ROBUST VENV + FIXED FLOWS + NODERED FIX
+# Version: 3.3 - ASYNC + ROBUST VENV + FIXED FLOWS + NODERED NODE24 FIX
 
 set -e
 
-echo "🚀 Installation RSS LLM Pipeline Native v3.2"
+echo "🚀 Installation RSS LLM Pipeline Native v3.3"
 echo "=========================================="
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -182,6 +182,21 @@ EOJ
 # Installation Node-RED + modules
 echo "   📦 Installation Node-RED et modules..."
 npm install
+
+# PATCH: Node.js 20+ Compatibility (util.log removal)
+echo "   🩹 Patching Node-RED for Node.js 20+ compatibility..."
+RED_JS="node_modules/node-red/red.js"
+LOG_JS="node_modules/@node-red/util/lib/log.js"
+
+if [ -f "$RED_JS" ]; then
+    sed -i 's/util.log/console.log/g' "$RED_JS"
+    echo "      ✅ $RED_JS patched"
+fi
+
+if [ -f "$LOG_JS" ]; then
+    sed -i 's/util.log/console.log/g' "$LOG_JS"
+    echo "      ✅ $LOG_JS patched"
+fi
 
 echo "   📜 Création du script de démarrage Node-RED..."
 cat > start_nodered.sh << 'EOS'
