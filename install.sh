@@ -1,6 +1,6 @@
 #!/bin/bash
 # RSS LLM Pipeline Native - Installation Automatique
-# Version: 3.2 - ASYNC + ROBUST VENV + FIXED FLOWS
+# Version: 3.3 - ASYNC + ROBUST VENV + FIXED FLOWS + NODERED FIX
 
 set -e
 
@@ -182,6 +182,13 @@ EOJ
 # Installation Node-RED + modules
 echo "   📦 Installation Node-RED et modules..."
 npm install
+
+echo "   📜 Création du script de démarrage Node-RED..."
+cat > start_nodered.sh << 'EOS'
+#!/bin/bash
+./node_modules/.bin/node-red --userDir ./userdir --port 18880
+EOS
+chmod +x start_nodered.sh
 
 # Configuration userdir
 USERDIR="$NODERED_DIR/userdir"
