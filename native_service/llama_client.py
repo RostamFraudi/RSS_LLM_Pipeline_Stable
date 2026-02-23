@@ -18,7 +18,7 @@ class LlamaClient:
     def __init__(self, config: Dict, prompts: Dict = None):
         self.classification_config = config.get('classification_server', {})
         self.summary_config = config.get('summary_server', {})
-        self.timeout = httpx.Timeout(30.0, connect=5.0)
+        self.timeout = httpx.Timeout(60.0, connect=10.0)
         
         # URLs des serveurs
         self.classification_url = self.classification_config.get('url', 'http://localhost:8080')
@@ -27,33 +27,47 @@ class LlamaClient:
         # Prompts
         self.prompts = prompts or {}
 
+        # Client HTTP persistant
+        self._client = None
+
         logger.info(f"🦙 LlamaClient initialisé")
         logger.info(f"   Classification: {self.classification_url}")
         logger.info(f"   Summary: {self.summary_url}")
 
+    async def get_client(self):
+        """Initialise ou retourne le client HTTP persistant"""
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(timeout=self.timeout)
+        return self._client
+
+    async def close(self):
+        """Ferme le client HTTP"""
+        if self._client and not self._client.is_closed:
+            await self._client.aclose()
+
     async def _post_completion(self, url: str, payload: Dict) -> Optional[Dict]:
         """Effectue un appel POST asynchrone au serveur llama.cpp"""
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            try:
-                response = await client.post(f"{url}/completion", json=payload)
-                response.raise_for_status()
-                return response.json()
-            except Exception as e:
-                logger.error(f"Erreur d'appel LLM à {url}: {e}")
-                return None
+        client = await self.get_client()
+        try:
+            response = await client.post(f"{url}/completion", json=payload)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            logger.error(f"Erreur d'appel LLM à {url}: {e}")
+            return None
 
     async def classify_domain(self, title: str, content: str, domains: List[str]) -> Dict:
         """Classification avec TinyLlama (Asynchrone)"""
         start_time = time.time()
-        
+
         # Construction du prompt
         template = self.prompts.get('classification', {}).get('base_prompt')
         if template:
-            # Assurer que les variables attendues sont présentes
             try:
-                prompt = template.format(title=title, content=content[:500])
+                # Gérer domains dynamiquement
+                domains_str = ", ".join(domains)
+                prompt = template.format(domains=domains_str, title=title, content=content[:500])
             except KeyError:
-                # Si le template attend d'autres variables non fournies
                 prompt = f"Classify this article into ONE category:\n{', '.join(domains)}\n\nTitle: {title}\nContent: {content[:500]}\n\nCategory:"
         else:
             domains_desc = "\n".join([f"- {domain}" for domain in domains])
@@ -153,24 +167,24 @@ class LlamaClient:
             "timestamp": time.time()
         }
         
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            # Test classification server
-            try:
-                response = await client.get(f"{self.classification_url}/health")
-                if response.status_code == 200:
-                    status["classification"]["status"] = "ok"
-                    status["classification"]["details"] = response.json()
-            except Exception as e:
-                status["classification"]["error"] = str(e)
+        client = await self.get_client()
+        # Test classification server
+        try:
+            response = await client.get(f"{self.classification_url}/health", timeout=5.0)
+            if response.status_code == 200:
+                status["classification"]["status"] = "ok"
+                status["classification"]["details"] = response.json()
+        except Exception as e:
+            status["classification"]["error"] = str(e)
 
-            # Test summary server
-            try:
-                response = await client.get(f"{self.summary_url}/health")
-                if response.status_code == 200:
-                    status["summary"]["status"] = "ok"
-                    status["summary"]["details"] = response.json()
-            except Exception as e:
-                status["summary"]["error"] = str(e)
+        # Test summary server
+        try:
+            response = await client.get(f"{self.summary_url}/health", timeout=5.0)
+            if response.status_code == 200:
+                status["summary"]["status"] = "ok"
+                status["summary"]["details"] = response.json()
+        except Exception as e:
+            status["summary"]["error"] = str(e)
             
         return status
     

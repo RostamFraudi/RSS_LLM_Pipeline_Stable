@@ -1,18 +1,18 @@
 {
   "classification": {
-    "base_prompt": "Classify this article into ONE category: fraude_investissement, fraude_paiement, fraude_president_cyber, fraude_ecommerce, supply_chain_cyber, intelligence_economique, fraude_crypto, cyber_investigations.\n\nTitle: {title}\nContent: {content}\n\nCategory:",
+    "base_prompt": "Classify this article into ONE category: {domains}\n\nTitle: {title}\nContent: {content}\n\nCategory:",
     "domains": [
-      "fraude_investissement: investment fraud, ponzi schemes, fake investments",
-      "fraude_paiement: payment fraud, credit card fraud, banking security", 
-      "fraude_president_cyber: CEO fraud, wire transfer scams, business email compromise",
-      "fraude_ecommerce: e-commerce fraud, online shopping scams",
-      "supply_chain_cyber: supply chain attacks, vendor compromises",
-      "intelligence_economique: economic intelligence, business strategy",
-      "fraude_crypto: cryptocurrency fraud, blockchain scams", 
-      "cyber_investigations: cybercrime investigation, hacking, data breaches"
+      "fraude_investissement",
+      "fraude_paiement",
+      "fraude_president_cyber",
+      "fraude_ecommerce",
+      "supply_chain_cyber",
+      "intelligence_economique",
+      "fraude_crypto",
+      "cyber_investigations"
     ]
   },
   "summary": {
-    "base_prompt": "Summarize this {domain} article in French (2-3 sentences):\n\nTitle: {title}\nContent: {content}\n\nSummary:"
+    "base_prompt": "Vous êtes un analyste cybersécurité francophone expert.\n\nMISSION : Analysez cet article sur {domain} et créez un résumé structuré.\n\nARTICLE :\nTitre : {title}\nContenu : {content}\n\nFORMAT OBLIGATOIRE :\n🎯 **Fait principal** : [1 phrase]\n🔍 **Impact** : [1 phrase]\n⚠️ **Recommandation** : [1 phrase]\n\nVOTRE RÉSUMÉ STRUCTURÉ :"
   }
 }
