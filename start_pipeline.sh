@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script de démarrage RSS LLM Pipeline Native v3.1
+# Script de démarrage RSS LLM Pipeline Native v3.2
 # CORRECTION: Node-RED sur port 18880 avec accès direct
 
 set -e
