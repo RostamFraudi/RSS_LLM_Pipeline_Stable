@@ -290,6 +290,7 @@ cat > "$USERDIR/flows.json" << 'EOF'
         "type": "split",
         "z": "a286e71930bddf50",
         "name": "Split sources",
+        "sarray": true,
         "x": 350,
         "y": 200,
         "wires": [["5e0f8e9f4deb0d64"]]
@@ -331,6 +332,7 @@ cat > "$USERDIR/flows.json" << 'EOF'
         "type": "split",
         "z": "a286e71930bddf50",
         "name": "Split articles",
+        "sarray": true,
         "x": 350,
         "y": 300,
         "wires": [["b8524d09134466d9"]]
