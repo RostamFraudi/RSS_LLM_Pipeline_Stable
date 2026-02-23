@@ -174,7 +174,7 @@ cat > package.json << 'EOJ'
     "node-red": "^3.1.0",
     "node-red-node-feedparser": "^0.3.0",
     "node-red-contrib-fs": "^1.4.1",
-    "node-red-contrib-http-request": "^0.1.16"
+    "node-red-contrib-http-request": "^0.1.14"
   }
 }
 EOJ
