@@ -48,6 +48,7 @@ echo "🌐 Tests Node-RED..."
 # Structure Node-RED
 [ -d "node_red_native" ] && echo "  ✅ node_red_native/" || { echo "  ❌ node_red_native/ manquant"; ((ERRORS++)); }
 [ -f "node_red_native/package.json" ] && echo "  ✅ package.json" || { echo "  ❌ package.json manquant"; ((ERRORS++)); }
+[ -x "node_red_native/start_nodered.sh" ] && echo "  ✅ start_nodered.sh" || { echo "  ❌ start_nodered.sh manquant ou non executable"; ((ERRORS++)); }
 
 # Installation Node-RED
 if [ -d "node_red_native/node_modules/node-red" ]; then
@@ -92,4 +93,3 @@ else
 fi
 
 exit $ERRORS
-if [ "$ERRORS" -eq 0 ]; then

@@ -10,12 +10,12 @@ while true; do
     
     # Processus
     echo "🔄 Processus actifs:"
-    ps aux | grep -E "(llama-server|python.*app.py)" | grep -v grep || echo "  Aucun processus"
+    ps aux | grep -E "(llama-server|python.*app.py|node-red)" | grep -v grep || echo "  Aucun processus"
     echo ""
     
     # Ports
     echo "🌐 Ports ouverts:"
-    ss -tlnp | grep -E "(8080|8081|15000)" || echo "  Aucun port"
+    ss -tlnp | grep -E "(8080|8081|15000|18880)" || echo "  Aucun port"
     echo ""
     
     # Ressources
